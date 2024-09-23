@@ -214,7 +214,7 @@ public class MessageListView extends JComponent {
 
                 // Scroll to the bottom if the user is already at the bottom
 
-                var scroll = scroll_bar.getValue() + scroll_bar.getVisibleAmount() + 75;
+                var scroll = scroll_bar.getValue() + scroll_bar.getVisibleAmount() + message_list.getComponent(message_list.getComponentCount() - 1).getHeight() + 30;
                 // System.out.println("Scroll: " + scroll);
                 var maximum_scroll = scroll_bar.getMaximum();
                 // System.out.println("Max Scroll: " + maximum_scroll);
