@@ -4,9 +4,15 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.MouseAdapter;
+import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -17,10 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,6 +38,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.text.StringEscapeUtils;
 import org.javacord.api.entity.Attachment;
 import org.javacord.api.entity.emoji.CustomEmoji;
+import org.javacord.api.entity.emoji.KnownCustomEmoji;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -321,13 +331,42 @@ public class TextView extends JComponent {
                                 var height = image.getHeight(this);
                                 // System.out.println("height: " + height);
                                 var scale = Math.min((double)width, this.getWidth()) / width;
+
+                                var context_menu = new JPopupMenu();
+
+                                var popup_label = context_menu.add("Copy Image");
+                                popup_label.addActionListener((e) -> {
+                                    copyToClipboard(image);
+                                });
+
+                                var save_item = context_menu.add("Save Image");
+                                save_item.addActionListener((e) -> {
+                                    savePrompt(image, filname);
+                                });
+
                                 img.setIcon(new ImageIcon(image.getScaledInstance((int) (width * scale),
                                         (int) (height * scale) , Image.SCALE_SMOOTH)));
                                 img.setBounds((int) x, (int) y, (int)(width * scale), (int)(height * scale));
                                 img.addMouseListener(new MouseAdapter() {
                                     @Override
                                     public void mouseClicked(java.awt.event.MouseEvent e) {
+                                        if (context_menu.isShowing())
+                                            return;
                                         JOptionPane.showMessageDialog(null, new ImageIcon(image), filname, JOptionPane.PLAIN_MESSAGE);
+                                    }
+
+                                    public void mousePressed(java.awt.event.MouseEvent e) {
+                                        if (e.isPopupTrigger()) {
+                                            context_menu.show(img, e.getX(), e.getY());
+                                            e.consume();
+                                        }
+                                    }
+
+                                    public void mouseReleased(java.awt.event.MouseEvent e) {
+                                        if (e.isPopupTrigger()) {
+                                            context_menu.show(img, e.getX(), e.getY());
+                                            e.consume();
+                                        }
                                     }
 
                                     @Override
@@ -391,6 +430,60 @@ public class TextView extends JComponent {
 
                                 label.setIcon(new ImageIcon(image.getScaledInstance((int) (image.getWidth(this) * scale),
                                         (int) (image.getHeight(this) * scale), Image.SCALE_SMOOTH)));
+
+                                var popup = new JPopupMenu();
+                                var popup_label = new JLabel();
+
+                                popup_label.setIcon(new ImageIcon(image));
+
+                                if (emoji instanceof KnownCustomEmoji known) {
+                                    popup_label.setText(String.format("""
+                                            <html>
+                                                <b>:%s:</b>
+                                                <br>
+                                                this emoji is from the server: %s
+                                            """, emoji.getName(), known.getServer().getName()));
+                                } else {
+                                    popup_label.setText(String.format("""
+                                            <html>
+                                                <b>:%s:</b>
+                                                <br>
+                                                this emoji is not from one of the servers you are in
+                                            </html>
+                                            """, emoji.getName()));
+                                }
+
+                                popup.add(popup_label);
+
+                                var copy_item = popup.add("Copy Emoji");
+                                copy_item.addActionListener((e) -> {
+                                    copyToClipboard(image);
+                                });
+
+                                var save_item = popup.add("Save Emoji");
+                                save_item.addActionListener((e) -> {
+                                    savePrompt(image, emoji.getName() + ".webp"); // webp is the only format discord uses for emojis, probably
+                                });
+
+                                label.addMouseListener(new MouseAdapter() {
+                                    @Override
+                                    public void mouseClicked(java.awt.event.MouseEvent e) {
+                                        popup.show(label, e.getX(), e.getY());
+                                    }
+
+                                    @Override
+                                    public void mouseEntered(java.awt.event.MouseEvent e) {
+                                        TextView.this.getParent().dispatchEvent(
+                                                SwingUtilities.convertMouseEvent(label, e, label.getParent()));
+                                    }
+
+                                    @Override
+                                    public void mouseExited(java.awt.event.MouseEvent e) {
+                                        TextView.this.getParent().dispatchEvent(
+                                                SwingUtilities.convertMouseEvent(label, e, label.getParent()));
+                                    }
+                                });
+                                label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
                                 yinc = image.getHeight(this) * scale;
                                 if (x + image.getWidth(this) * scale > this.getWidth()) {
@@ -550,6 +643,59 @@ public class TextView extends JComponent {
             // }
             // System.out.println("added label");
         // });
+    }
+
+    public static void copyToClipboard(Image image) {
+        var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(new Transferable() {
+            @Override
+            public DataFlavor[] getTransferDataFlavors() {
+                return new DataFlavor[] { DataFlavor.imageFlavor };
+            }
+
+            @Override
+            public boolean isDataFlavorSupported(DataFlavor flavor) {
+                return flavor.equals(DataFlavor.imageFlavor);
+            }
+
+            @Override
+            public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+                if (flavor.equals(DataFlavor.imageFlavor)) {
+                    return image;
+                }
+                throw new UnsupportedFlavorException(flavor);
+            }
+        }, null);
+    }
+
+    public static void savePrompt(Image image, String filename) {
+        var fc = new JFileChooser();
+        fc.setDialogTitle("Save Image");
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        var extension = filename.substring(filename.lastIndexOf('.'));
+
+        fc.setFileFilter(new javax.swing.filechooser.FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory() || f.getName().endsWith(extension);
+            }
+
+            @Override
+            public String getDescription() {
+                return "Image Files";
+            }
+        });
+        if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            try {
+                var file = fc.getSelectedFile();
+                if (!file.getName().endsWith(extension)) {
+                    file = new File(file.getAbsolutePath() + extension);
+                }
+                ImageIO.write((RenderedImage) image, extension.substring(1), file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
     
     public static Document parseXML(String xmlContent) throws ParserConfigurationException, SAXException, IOException {
