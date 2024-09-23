@@ -105,7 +105,39 @@ public class MediaCache {
         }
     }
 
+    static int indent = 0;
+
+    static String toString(Object o) {
+        var str = switch (o) {
+            case Map<?, ?> map -> {
+                var builder = new StringBuilder();
+                builder.append("{\n");
+                indent++;
+                for (var entry : map.entrySet()) {
+                    for (int i = 0; i < indent; i++) {
+                        builder.append("    ");
+                    }
+                    builder
+                        .append(toString(entry.getKey()))
+                        .append(": ")
+                        .append(toString(entry.getValue()))
+                        .append(", \n");
+                }
+                indent--;
+                for (int i = 0; i < indent; i++) {
+                    builder.append("    ");
+                }
+                builder.append("}");
+                yield builder.toString();
+            }
+            case null, default -> String.valueOf(o);
+        };
+        return str;
+    }
+
     public static synchronized <T> byte[] get(String scope, T key, Function<? super T, ? extends URL> url_provider) {
+        // System.out.println("Getting " + key + " from " + scope);
+        // System.out.println("Current Cache: " + toString(cache));
         var map = cache.computeIfAbsent(scope, (e) -> new WeakHashMap<>());
         try {
             var url = url_provider.apply(key);
