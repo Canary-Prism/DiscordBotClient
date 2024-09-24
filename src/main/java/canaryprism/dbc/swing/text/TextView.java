@@ -242,15 +242,17 @@ public class TextView extends JComponent {
                         continue;
                     }
 
+                    var metrics = this.getFontMetrics(font);
+
                     for (int j = 0; j < split.length - 1; j++) {
                         placeText(split[j]);
                         x = 0;
-                        yinc = this.getFontMetrics(font).getLineMetrics(split[j], getGraphics()).getHeight();
-                        y += yinc;
+                        yinc = metrics.getHeight() - metrics.getDescent() + metrics.getMaxDescent();
+                        y += metrics.getHeight();
                     }
 
                     var last = split[split.length - 1];
-                    yinc = this.getFontMetrics(font).getLineMetrics(last, getGraphics()).getHeight();
+                    yinc = metrics.getHeight() - metrics.getDescent() + metrics.getMaxDescent();
                     placeText(last);
                 }
                 case Node.ELEMENT_NODE -> {
@@ -302,7 +304,7 @@ public class TextView extends JComponent {
 
                                 if (x > 0) {
                                     x = 0;
-                                    y += yinc + this.getFontMetrics(this.getFont()).getMaxDescent();
+                                    y += yinc;
                                 }
                                 var url = attachment.getUrl();
 
@@ -567,9 +569,9 @@ public class TextView extends JComponent {
 
                         x = 0;
 
-                        yinc = line_metrics.getHeight();
+                        yinc = line_metrics.getHeight() - line_metrics.getDescent() + metrics.getMaxDescent();
 
-                        y += yinc;
+                        y += line_metrics.getHeight();
 
                         split[j] = "";
 
@@ -616,15 +618,15 @@ public class TextView extends JComponent {
     
             sb.insert(0, "<html>").append("</html>");
     
-            var line_metrics = metrics.getLineMetrics(text, getGraphics());
+            // var line_metrics = metrics.getLineMetrics(text, getGraphics());
     
             var label = new JLabel();
             label.setText(sb.toString());
     
             label.setFont(this.getFont());
     
-            label.setBounds((int) x, (int) y,
-                    (int) metrics.stringWidth(text), (int) line_metrics.getHeight());
+            label.setBounds((int) x, (int) y - metrics.getMaxAscent() + metrics.getAscent(),
+                    (int) metrics.stringWidth(text), (int) metrics.getMaxAscent() + metrics.getMaxDescent() + metrics.getLeading());
             sb.setLength(0);
     
             // System.out.println("add label: " + label.getText());
