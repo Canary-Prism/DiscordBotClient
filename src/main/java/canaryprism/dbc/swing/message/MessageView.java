@@ -74,7 +74,7 @@ public class MessageView extends JComponent {
         this.is_reply = message.getReferencedMessage().isPresent();
         if (is_reply) {
             reply_view = new ReferenceMessageView(message.getReferencedMessage().get());
-            reply_view.setLocation(pfp + 10 + 5, 0);
+            reply_view.setLocation(pfp + 10 + 5, 5);
             this.add(reply_view);
         }
         
@@ -303,7 +303,7 @@ public class MessageView extends JComponent {
 
         if (is_reply) {
             reply_view.setSize(width, reply_view.getPreferredSize().height);
-            y += reply_view.getPreferredSize().height;
+            y += reply_view.getPreferredSize().height + reply_view.getY();
         }
 
 
@@ -428,7 +428,7 @@ public class MessageView extends JComponent {
         var y = 5;
 
         if (is_reply) {
-            y += reply_view.getPreferredSize().height;
+            y += reply_view.getPreferredSize().height + reply_view.getY();
 
             // uhh time to draw some line but with rounded corners, hopefully
             var g2 = (Graphics2D) g.create();
