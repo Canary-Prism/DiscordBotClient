@@ -184,6 +184,13 @@ public class InteractableMessageListView extends JComponent {
                 message.delete();
             });
         }
+
+        if (message.getAuthor().getId() == channel.getApi().getYourself().getId()) {
+            var edit_item = context_menu.add("Edit");
+            edit_item.addActionListener((e) -> {
+                view.setEditing(true);
+            });
+        }
         
         var future = new CompletableFuture<Void>();
 

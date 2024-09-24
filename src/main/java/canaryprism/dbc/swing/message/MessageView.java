@@ -2,6 +2,10 @@ package canaryprism.dbc.swing.message;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+
 import org.apache.commons.text.StringEscapeUtils;
 import org.javacord.api.entity.message.Message;
 
@@ -10,6 +14,7 @@ import canaryprism.dbc.markdown.DiscordMarkdown;
 import canaryprism.dbc.swing.text.TextView;
 
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -43,6 +48,13 @@ public class MessageView extends JComponent {
     private ReferenceMessageView reply_view;
 
     private TextView text_pane = new TextView("");
+
+    private boolean is_deleted;
+
+    private JPanel edit_panel = new JPanel();
+    private JTextArea edit_input = new JTextArea();
+
+    private boolean is_editing;
 
     public MessageView(Message message) {
         this(message, null);
@@ -110,6 +122,11 @@ public class MessageView extends JComponent {
         });
         reloadText();
 
+        message.addMessageDeleteListener((_) -> {
+            is_deleted = true;
+            repaint();
+        });
+
         this.addMouseListener(new MouseAdapter() {
             boolean hovers;
             private void update() {
@@ -131,6 +148,70 @@ public class MessageView extends JComponent {
                 update();
             }
         });
+
+        // var edit_input = new JTextArea();
+        edit_input.setLineWrap(true);
+        edit_input.setWrapStyleWord(true);
+        edit_input.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    if (!e.isShiftDown()) {
+                        var text = edit_input.getText();
+                        if (text.isBlank()) {
+                            return;
+                        }
+
+                        message.edit(edit_input.getText()).exceptionally((n) -> {
+                            n.printStackTrace();
+                            JOptionPane.showMessageDialog(null, "Failed to edit message: " + n.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                            return null;
+                        }).join();
+
+                        edit_input.setText("");
+
+                        setEditing(false);
+
+                        e.consume();
+                    } else {
+                        // uhh somehow add a newline because JTextArea doesn't do that by default for some reason hehe
+                        edit_input.replaceRange("\n", edit_input.getSelectionStart(), edit_input.getSelectionEnd());
+                    }
+                } else if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
+                    setEditing(false);
+
+                    e.consume();
+                }
+            }
+        });
+        edit_panel.setLayout(new BorderLayout());
+
+        edit_panel.add(edit_input);
+
+        // edit_panel.setBorder(new LineBorder(Color.blue, 1));
+        // edit_input.setBorder(new LineBorder(Color.red, 1));
+
+        edit_panel.setVisible(false);
+
+        this.add(edit_panel);
+    }
+
+    public void setEditing(boolean is_editing) {
+        this.is_editing = is_editing;
+        if (is_editing) {
+            edit_input.setText(message.getContent());
+            
+            edit_panel.setVisible(true);
+            text_pane.setVisible(false);
+
+            edit_input.requestFocusInWindow();
+        } else {
+            edit_panel.setVisible(false);
+            text_pane.setVisible(true);
+        }
+
+        this.doLayout();
+        this.getParent().revalidate();
     }
 
     private void reloadText() {
@@ -213,7 +294,7 @@ public class MessageView extends JComponent {
         if (!shows_author) {
             // this is stupid but it works
             var y1 = y - creation_label.getFontMetrics(creation_label.getFont()).getAscent() / 2;
-            creation_label.setBounds(1, (int)y1, width - (int) x, height - (int) y1);
+            creation_label.setBounds(5, (int)y1, width - (int) x, height - (int) y1);
         }
 
         if (shows_author) {
@@ -224,9 +305,18 @@ public class MessageView extends JComponent {
             reply_view.setSize(width, reply_view.getPreferredSize().height);
             y += reply_view.getPreferredSize().height;
         }
-    
-        y -= text_pane.getFontMetrics(text_pane.getFont()).getAscent();
-        text_pane.setBounds(
+
+
+        if (!is_editing) {
+            y -= text_pane.getFontMetrics(text_pane.getFont()).getAscent();
+            text_pane.setBounds( // only set bounds here because holy shit this takes so long to set bouns
+                (int)x, 
+                (int)y, 
+                width - (int)x, 
+                height - (int)y
+            );
+        }
+        edit_panel.setBounds(
             (int)x, 
             (int)y, 
             width - (int)x, 
@@ -243,9 +333,20 @@ public class MessageView extends JComponent {
         // text_pane.setSize(getWidth() - pfp - 4, Integer.MAX_VALUE); // Temporarily
         // set height to max value to recalculate
         // // preferred height
-        text_pane.doLayout();
 
-        var mewo = text_pane.getPreferredSize().height + y;
+        int mewo;
+
+        if (!is_editing) {
+            text_pane.doLayout();
+    
+            mewo = text_pane.getPreferredSize().height + y;
+        } else {
+            edit_panel.doLayout();
+    
+            mewo = edit_panel.getPreferredSize().height + y;
+        }
+
+
         if (shows_author) {
             preferred_size.height = Math.max(mewo, pfp);
         } else {
@@ -300,7 +401,14 @@ public class MessageView extends JComponent {
 
 
         // g.scale(scale, scale);
-        if (is_highlight) {
+        if (is_deleted) {
+            var g2 = (Graphics2D) g.create();
+            g2.setColor(new Color(0x22aa0000, true));
+            g2.fillRect(0, 0, getWidth(), getHeight());
+            g2.setColor(new Color(0xaa0000));
+            g2.fillRect(0, 0, 2, getHeight());
+
+        } else if (is_highlight) {
             // System.out.println("drawing highlight");
             var g2 = (Graphics2D) g.create();
             g2.setColor(new Color(0x225500ff, true));
