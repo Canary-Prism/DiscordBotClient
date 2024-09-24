@@ -56,18 +56,25 @@ public class MessageInputView extends JComponent {
         this.add(attachments_panel);
 
         this.input = new JTextArea();
+        input.setLineWrap(true);
+        input.setWrapStyleWord(true);
 
         input.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER && !e.isShiftDown()) {
-                    var text = input.getText();
-                    if (text.isBlank() && attachments.isEmpty()) {
-                        return;
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    if (!e.isShiftDown()) {
+                        var text = input.getText();
+                        if (text.isBlank() && attachments.isEmpty()) {
+                            return;
+                        }
+                        sendMessage();
+    
+                        e.consume();
+                    } else {
+                        // uhh somehow add a newline because JTextArea doesn't do that by default for some reason hehe
+                        input.replaceRange("\n", input.getSelectionStart(), input.getSelectionEnd());
                     }
-                    sendMessage();
-
-                    e.consume();
                 }
             }
         });
