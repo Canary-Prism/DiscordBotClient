@@ -4,11 +4,15 @@ import java.awt.BorderLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import org.javacord.api.entity.channel.RegularServerChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
+import org.javacord.api.entity.channel.TextableRegularServerChannel;
+
 import canaryprism.dbc.swing.channel.memberlist.MemberListView;
 
 public class ServerTextChannelView extends JComponent {
-    public ServerTextChannelView(ServerTextChannel channel) {
+    public <T extends TextableRegularServerChannel & RegularServerChannel> ServerTextChannelView(T channel) {
         this.setLayout(new BorderLayout());
 
         var content_panel = new JPanel(new BorderLayout());
@@ -23,8 +27,14 @@ public class ServerTextChannelView extends JComponent {
 
         this.add(content_panel, BorderLayout.CENTER);
 
-        var channel_info = new JLabel(channel.getName() + " | " + channel.getTopic());
+        var channel_info = channel.getName();
 
-        this.add(channel_info, BorderLayout.NORTH);
+        if (channel instanceof ServerTextChannel c && !c.getTopic().isEmpty()) {
+            channel_info += " | " + c.getTopic();
+        }
+
+        var channel_info_label = new JLabel(channel_info);
+
+        this.add(channel_info_label, BorderLayout.NORTH);
     }
 }
