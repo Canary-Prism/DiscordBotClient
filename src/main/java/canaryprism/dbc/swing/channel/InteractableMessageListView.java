@@ -6,6 +6,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -176,6 +177,13 @@ public class InteractableMessageListView extends JComponent {
             replying_to = view;
             view.setHighlight(true);
             input_view.setReplyingTo(message);
+        });
+
+        var copy_text_item = context_menu.add("Copy Text");
+        copy_text_item.addActionListener((e) -> {
+            var text = message.getContent();
+            var clipboard = InteractableMessageListView.this.getToolkit().getSystemClipboard();
+            clipboard.setContents(new java.awt.datatransfer.StringSelection(text), null);
         });
         
         if (message.getAuthor().getId() == channel.getApi().getYourself().getId()) {
