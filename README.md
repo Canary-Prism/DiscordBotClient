@@ -24,5 +24,16 @@ This program uses Java 21
 
 ## Historical Changelog
 
+### 1.1.0
+- actually uses Java 21 now
+- improved autoscrolling
+- added copy and save image to attachments and emojis
+- message input now is multiline
+- added support for Server Voice Channels' text channels
+- improved text spacing
+- added ability to edit messages
+- deleted messages are highlighted in red
+- added ability to copy message content
+
 ### 1.0.0
 - made the thing
