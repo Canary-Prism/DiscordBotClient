@@ -53,12 +53,16 @@ public class Main {
     public static void main(String[] args) {
 
         {
+            System.setProperty("apple.awt.application.name", "DiscordBotClient");
             var laf = getArg(args, "--laf", (e) -> {
                 if (e.equals("default")) {
                     return UIManager.getSystemLookAndFeelClassName();
                 }
                 return e;
-            }, () -> FlatMacDarkLaf.class.getName());
+            }, () -> {
+                System.setProperty("apple.awt.application.appearance", "system");
+                return FlatMacDarkLaf.class.getName();
+            });
         
             try {
                 UIManager.setLookAndFeel(laf);
