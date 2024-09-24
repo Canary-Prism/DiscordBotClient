@@ -4,14 +4,23 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.Ellipse2D;
+import java.util.HashMap;
+
 import javax.swing.JComponent;
+
+import org.apache.commons.text.StringEscapeUtils;
 import org.javacord.api.entity.message.Message;
 import canaryprism.dbc.MediaCache;
+import canaryprism.dbc.markdown.DiscordMarkdown;
+import canaryprism.dbc.swing.text.TextView;
 
 public class ReferenceMessageView extends JComponent {
 
     private final Message message;
 
+    private TextView text_pane = new TextView("");
+
+    private boolean edited;
 
     private Image image;
 
@@ -24,14 +33,55 @@ public class ReferenceMessageView extends JComponent {
         this.message = message;
         this.pings = pings;
 
+        this.edited = message.getLastEditTimestamp().isPresent();
+
         Thread.ofVirtual().start(() -> {
             // image = Main.getImage(message.getUserAuthor().get());
             image = MediaCache.getImage("author_pfp", message.getAuthor(), (e) -> e.getAvatar(64).getUrl());
             repaint();
         });
+
+        message.addMessageEditListener((e) -> {
+            edited = true;
+
+            reloadText();
+            repaint();
+        });
+        reloadText();
+
+        this.add(text_pane);
+    }
+
+    private void reloadText() {
+        var sb = new StringBuilder();
+        var map = new HashMap<>();
+        sb.append(String.format(
+            "%s%s", 
+            DiscordMarkdown.parseEmojis(DiscordMarkdown.toXHTML(StringEscapeUtils.escapeXml11((message.getContent()))), false), 
+            edited ? " <small>(edited)</small>" : ""
+        ));
+
+        for (var emoji : message.getCustomEmojis()) {
+
+            map.put(emoji.getIdAsString(), emoji);
+        }
+        text_pane.setText(sb.toString(), map);
+
+        revalidate();
     }
 
     static final int pfp = 15;
+
+    @Override
+    public void doLayout() {
+        super.doLayout();
+        var x = pfp + 5;
+        var y = this.getHeight() / 2 - this.getFontMetrics(this.getFont()).getHeight() / 2 - 7;
+
+        text_pane.setBounds(x, y, this.getWidth() - x, this.getHeight() - y);
+        text_pane.doLayout();
+        text_pane.repaint();
+    }
 
     @Override
     public Dimension getPreferredSize() {
@@ -51,18 +101,6 @@ public class ReferenceMessageView extends JComponent {
 
             g2.clip(new Ellipse2D.Double(0, 0, pfp, pfp));
             g2.drawImage(image, 0, 0, pfp, pfp, this);
-        }
-
-        var x = pfp + 10;
-        var y = this.getHeight() / 2 + g.getFontMetrics().getHeight() / 2 - g.getFontMetrics().getDescent();
-
-        {
-            var g2 = (Graphics2D) g.create();
-            g2.drawString(message.getContent(), x, y);
-
-            x += g2.getFontMetrics().stringWidth(message.getContent()) + 10;
-
-            y += 20;
         }
 
     }

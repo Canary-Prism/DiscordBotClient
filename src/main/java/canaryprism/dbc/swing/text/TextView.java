@@ -618,14 +618,14 @@ public class TextView extends JComponent {
     
             sb.insert(0, "<html>").append("</html>");
     
-            // var line_metrics = metrics.getLineMetrics(text, getGraphics());
+            var line_metrics = metrics.getLineMetrics(text, getGraphics());
     
             var label = new JLabel();
             label.setText(sb.toString());
     
             label.setFont(this.getFont());
     
-            label.setBounds((int) x, (int) y - metrics.getMaxAscent() + metrics.getAscent(),
+            label.setBounds((int) x, (int) Math.round(y - metrics.getMaxAscent() + 12 + line_metrics.getBaselineOffsets()[line_metrics.getBaselineIndex()]),
                     (int) metrics.stringWidth(text), (int) metrics.getMaxAscent() + metrics.getMaxDescent() + metrics.getLeading());
             sb.setLength(0);
     

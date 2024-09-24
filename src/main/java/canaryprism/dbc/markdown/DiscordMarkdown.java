@@ -13,7 +13,7 @@ public class DiscordMarkdown {
 
     public static String toXHTML(String str) {
 
-        var is_emoji_only = emoji.matcher(str).replaceAll("").isBlank();
+        // var is_emoji_only = emoji.matcher(str).replaceAll("").isBlank();
 
         str = bold_italic.matcher(str).replaceAll("<b><i>$1</i></b>");
         str = bold.matcher(str).replaceAll("<b>$1</b>");
@@ -21,9 +21,21 @@ public class DiscordMarkdown {
         str = code.matcher(str).replaceAll("<pre>$1</pre>");
         str = escape.matcher(str).replaceAll("$1");
 
-        str = emoji.matcher(str).replaceAll(String.format("<emoji key=\"$1\" %s/>", is_emoji_only ? "size='40' " : ""));
+        // str = emoji.matcher(str).replaceAll(String.format("<emoji key=\"$1\" %s/>", is_emoji_only ? "size='40' " : ""));
 
         // text = text.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
         return str;
+    }
+
+    public static String parseEmojis(String str) {
+        return parseEmojis(str, true);
+    }
+    public static String parseEmojis(String str, boolean allow_big_emojis) {
+        var is_emoji_only = false;
+        if (allow_big_emojis) {
+            emoji.matcher(str).replaceAll("").isBlank();
+        }
+
+        return emoji.matcher(str).replaceAll(String.format("<emoji key=\"$1\" %s/>", is_emoji_only ? "size='40' " : ""));
     }
 }

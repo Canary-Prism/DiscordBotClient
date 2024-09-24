@@ -219,7 +219,7 @@ public class MessageView extends JComponent {
         var map = new HashMap<>();
         sb.append(String.format(
             "%s%s", 
-            DiscordMarkdown.toXHTML(StringEscapeUtils.escapeXml11((message.getContent()))), 
+            DiscordMarkdown.parseEmojis(DiscordMarkdown.toXHTML(StringEscapeUtils.escapeXml11((message.getContent())))), 
             edited ? " <small>(edited)</small>" : ""
         ));
         int i = 0;
