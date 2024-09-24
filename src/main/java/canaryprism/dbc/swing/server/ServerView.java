@@ -23,7 +23,7 @@ import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.channel.TextableRegularServerChannel;
 import org.javacord.api.entity.server.Server;
 
-import canaryprism.dbc.swing.channel.ServerTextChannelView;
+import canaryprism.dbc.swing.channel.ServerTextableChannelView;
 import canaryprism.dbc.swing.channel.channellist.ChannelCategoryView;
 import canaryprism.dbc.swing.channel.channellist.ServerChannelListView;
 
@@ -135,13 +135,13 @@ public class ServerView extends JComponent {
     protected JComponent createChannelView(Channel c) {
         return switch (c) {
             case ServerTextChannel channel when channel.canYouSee() -> {
-                var view = new ServerTextChannelView(channel);
+                var view = new ServerTextableChannelView(channel);
                 var panel = new JPanel(new BorderLayout());
                 panel.add(view);
                 yield panel;
             }
             case ServerVoiceChannel channel when channel.canYouSee() -> {
-                var view = new ServerTextChannelView(channel);
+                var view = new ServerTextableChannelView(channel);
                 var panel = new JPanel(new BorderLayout());
                 panel.add(view);
                 yield panel;

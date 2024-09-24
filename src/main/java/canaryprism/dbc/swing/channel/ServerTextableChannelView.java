@@ -11,8 +11,8 @@ import org.javacord.api.entity.channel.TextableRegularServerChannel;
 
 import canaryprism.dbc.swing.channel.memberlist.MemberListView;
 
-public class ServerTextChannelView extends JComponent {
-    public <T extends TextableRegularServerChannel & RegularServerChannel> ServerTextChannelView(T channel) {
+public class ServerTextableChannelView extends JComponent {
+    public <T extends TextableRegularServerChannel & RegularServerChannel> ServerTextableChannelView(T channel) {
         this.setLayout(new BorderLayout());
 
         var content_panel = new JPanel(new BorderLayout());
