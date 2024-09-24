@@ -178,17 +178,17 @@ public class InteractableMessageListView extends JComponent {
             input_view.setReplyingTo(message);
         });
         
-        if (message.canYouDelete()) {
-            var delete_item = context_menu.add("Delete");
-            delete_item.addActionListener((e) -> {
-                message.delete();
-            });
-        }
-
         if (message.getAuthor().getId() == channel.getApi().getYourself().getId()) {
             var edit_item = context_menu.add("Edit");
             edit_item.addActionListener((e) -> {
                 view.setEditing(true);
+            });
+        }
+
+        if (message.canYouDelete()) {
+            var delete_item = context_menu.add("Delete");
+            delete_item.addActionListener((e) -> {
+                message.delete();
             });
         }
         
