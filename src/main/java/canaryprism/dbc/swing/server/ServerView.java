@@ -16,8 +16,10 @@ import javax.swing.border.EmptyBorder;
 
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.ChannelCategory;
+import org.javacord.api.entity.channel.RegularServerChannel;
 import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
+import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.channel.TextableRegularServerChannel;
 import org.javacord.api.entity.server.Server;
 
@@ -138,7 +140,13 @@ public class ServerView extends JComponent {
                 panel.add(view);
                 yield panel;
             }
-            case ServerTextChannel _ -> {
+            case ServerVoiceChannel channel when channel.canYouSee() -> {
+                var view = new ServerTextChannelView(channel);
+                var panel = new JPanel(new BorderLayout());
+                panel.add(view);
+                yield panel;
+            }
+            case Channel channel when !channel.canYouSee() -> {
                 yield new JLabel("You do not have permission to view this channel");
             }
             case null, default -> new JLabel("Unsupported Channel");
