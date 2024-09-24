@@ -18,9 +18,10 @@ import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.ChannelCategory;
 import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
+import org.javacord.api.entity.channel.TextableRegularServerChannel;
 import org.javacord.api.entity.server.Server;
 
-import canaryprism.dbc.swing.channel.TextChannelView;
+import canaryprism.dbc.swing.channel.ServerTextChannelView;
 import canaryprism.dbc.swing.channel.channellist.ChannelCategoryView;
 import canaryprism.dbc.swing.channel.channellist.ServerChannelListView;
 
@@ -132,12 +133,12 @@ public class ServerView extends JComponent {
     protected JComponent createChannelView(Channel c) {
         return switch (c) {
             case ServerTextChannel channel when channel.canYouSee() -> {
-                var view = new TextChannelView(channel);
+                var view = new ServerTextChannelView(channel);
                 var panel = new JPanel(new BorderLayout());
                 panel.add(view);
                 yield panel;
             }
-            case ServerTextChannel channel -> {
+            case ServerTextChannel _ -> {
                 yield new JLabel("You do not have permission to view this channel");
             }
             case null, default -> new JLabel("Unsupported Channel");

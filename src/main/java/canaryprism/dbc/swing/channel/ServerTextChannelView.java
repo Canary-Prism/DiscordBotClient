@@ -7,8 +7,8 @@ import javax.swing.JPanel;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import canaryprism.dbc.swing.channel.memberlist.MemberListView;
 
-public class TextChannelView extends JComponent {
-    public TextChannelView(ServerTextChannel channel) {
+public class ServerTextChannelView extends JComponent {
+    public ServerTextChannelView(ServerTextChannel channel) {
         this.setLayout(new BorderLayout());
 
         var content_panel = new JPanel(new BorderLayout());
