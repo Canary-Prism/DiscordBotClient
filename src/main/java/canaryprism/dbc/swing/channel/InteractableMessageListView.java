@@ -40,7 +40,7 @@ public class InteractableMessageListView extends JComponent {
         message_list_view = new MessageListView(channel) {
             @Override
             protected JComponent createMessageView(Message message, Message previous) {
-                var view = new MessageView(message, previous);
+                var view = (MessageView) super.createMessageView(message, previous);
                 // view.setBorder(new LineBorder(Color.red, 1));
                 
 
