@@ -114,7 +114,7 @@ public class MessageView extends JComponent {
             repaint();
         });
 
-        message.addMessageEditListener((_) -> {
+        message.addMessageEditListener((e) -> {
             edited = true;
 
             reloadText();
@@ -122,7 +122,7 @@ public class MessageView extends JComponent {
         });
         reloadText();
 
-        message.addMessageDeleteListener((_) -> {
+        message.addMessageDeleteListener((e) -> {
             is_deleted = true;
             repaint();
         });

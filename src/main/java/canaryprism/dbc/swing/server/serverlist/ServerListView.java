@@ -54,11 +54,11 @@ public class ServerListView extends JComponent {
             }
         });
 
-        api.addServerBecomesAvailableListener((_) -> {
+        api.addServerBecomesAvailableListener((e) -> {
             reloadList();
         });
 
-        api.addServerBecomesUnavailableListener((_) -> {
+        api.addServerBecomesUnavailableListener((e) -> {
             reloadList();
         });
     }
