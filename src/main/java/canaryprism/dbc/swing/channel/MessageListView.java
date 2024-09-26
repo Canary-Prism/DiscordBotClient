@@ -229,6 +229,8 @@ public class MessageListView extends JComponent {
                         scroll_bar.revalidate();
                         scroll_pane.repaint();
                         scroll_pane.revalidate();
+                        message_list.revalidate();
+                        message_list.repaint();
                     });
                 }
             }
