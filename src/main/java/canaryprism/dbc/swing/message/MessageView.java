@@ -65,7 +65,7 @@ public class MessageView extends JComponent {
     }
 
     public MessageView(Message message, Message previous) {
-        this.setOpaque(true);
+        // this.setOpaque(true);
 
         this.message = Objects.requireNonNull(message);
 
@@ -396,6 +396,13 @@ public class MessageView extends JComponent {
         super.paintComponent(g1);
 
         var g = (Graphics2D) g1;
+
+        if (this.isOpaque()) {
+            var g2 = (Graphics2D) g.create();
+
+            g2.setColor(this.getBackground());
+            g2.fillRect(0, 0, getWidth(), getHeight());
+        }
 
         creation_label.setVisible(is_hover || shows_author);
 

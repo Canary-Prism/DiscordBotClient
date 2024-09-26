@@ -314,6 +314,8 @@ public class MessageListView extends JComponent {
 
         // panel.add(view, BorderLayout.CENTER);
 
+        view.setOpaque(true);
+
         return view;
     }
 

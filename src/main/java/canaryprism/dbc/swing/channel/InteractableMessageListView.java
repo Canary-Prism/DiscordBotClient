@@ -2,6 +2,7 @@ package canaryprism.dbc.swing.channel;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
+import javax.swing.border.LineBorder;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.BorderLayout;
@@ -77,12 +78,16 @@ public class InteractableMessageListView extends JComponent {
                     private Color normal_background;
 
                     private void updateBackground() {
+                        normal_background = InteractableMessageListView.this.getBackground();
                         if (hover || select) {
-                            normal_background = InteractableMessageListView.this.getBackground();
+                            // normal_background = InteractableMessageListView.this.getBackground();
                             view.setBackground(normal_background.brighter());
                         } else {
                             view.setBackground(normal_background);
                         }
+                        message_list.repaint(); // windows fix???
+                        message_list_view.repaint();
+                        view.revalidate();
                         view.repaint();
                     }
 
