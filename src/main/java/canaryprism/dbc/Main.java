@@ -98,6 +98,10 @@ public class Main {
                 Files.createDirectories(media_cache_path);
             } catch (IOException e) {
                 e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Failed to create media cache directory", "DiscordBotClient",
+                    JOptionPane.ERROR_MESSAGE);
+                
+                System.exit(1); // ehehe
             }
         }
         MediaCache.loadStorageCache(media_cache_path);
