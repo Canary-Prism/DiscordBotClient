@@ -524,7 +524,7 @@ public class TextView extends JComponent {
             // if the text is too long to fit in the width
 
             var split = whitespace.splitWithDelimiters(" " + text, 0);
-            split[1] = "";
+            split[1] = split[1].substring(1);
 
             {
 
@@ -540,7 +540,7 @@ public class TextView extends JComponent {
 
                     if (x + metrics.stringWidth(sb.toString()) > this.getWidth()) {
                         sb.delete(insert, sb.length());
-                        if (metrics.stringWidth(sb.toString() + split_space) < this.getWidth()
+                        if ((x + metrics.stringWidth(sb.toString() + split_space)) < this.getWidth()
                                 && metrics.stringWidth(split_text) > this.getWidth()) {
                             // if the word is too long to fit even in the next line
                             // then we just split the word
@@ -549,7 +549,11 @@ public class TextView extends JComponent {
 
                             int k = 0;
 
-                            while (metrics.stringWidth(sb.toString()) < this.getWidth()) {
+                            if (x == 0) { // if it's already a new line, we *must* add at least one character
+                                sb.append(split_text.charAt(k++));
+                            }
+
+                            while ((x + metrics.stringWidth(sb.toString())) < this.getWidth()) {
                                 sb.append(split_text.charAt(k++));
                             }
 
@@ -558,12 +562,14 @@ public class TextView extends JComponent {
                         }
 
                         var str = sb.toString();
-
-                        if (str.isEmpty())
+                        
+                        if (!sb.isEmpty()) {
+                            createJLabel(str);
+                            sb.setLength(0);
+                        } else if (split_text.equals(split[j + 1])) {
                             continue;
-
-                        createJLabel(str);
-                        sb.setLength(0);
+                        }
+                        
 
                         var line_metrics = metrics.getLineMetrics(str, getGraphics());
 
@@ -598,6 +604,8 @@ public class TextView extends JComponent {
         }
     }
 
+    private static final Pattern space = Pattern.compile(" ");
+
     private void createJLabel(String text) {
         // SwingUtilities.invokeLater(() -> {
         // Thread.ofVirtual().start(() -> {
@@ -605,7 +613,8 @@ public class TextView extends JComponent {
     
             var metrics = this.getFontMetrics(this.getFont());
     
-            sb.append(StringEscapeUtils.escapeHtml3(text));
+            sb.append(space.matcher(StringEscapeUtils.escapeHtml3(text)).replaceAll("&nbsp;"));
+
             if (strikethrough) {
                 sb.insert(0, "<s>").append("</s>");
             }
@@ -624,6 +633,7 @@ public class TextView extends JComponent {
             label.setText(sb.toString());
     
             label.setFont(this.getFont());
+            // label.setBorder(new LineBorder(Color.red, 1));
     
             label.setBounds((int) x, (int) Math.round(y - metrics.getMaxAscent() + 12 + line_metrics.getBaselineOffsets()[line_metrics.getBaselineIndex()]),
                     (int) metrics.stringWidth(text), (int) metrics.getMaxAscent() + metrics.getMaxDescent() + metrics.getLeading());
