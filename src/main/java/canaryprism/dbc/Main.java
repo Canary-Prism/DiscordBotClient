@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -19,7 +20,6 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Node;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
 import canaryprism.dbc.swing.DiscordView;
@@ -75,9 +75,9 @@ public class Main {
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        var panel = new JPanel();
+        var main_panel = new JPanel();
 
-        panel.setLayout(new BorderLayout());
+        main_panel.setLayout(new BorderLayout());
         var config_path = Path.of(dirs.configDir);
         if (!Files.isDirectory(config_path)) {
             try {
@@ -90,7 +90,27 @@ public class Main {
                     JOptionPane.ERROR_MESSAGE);
             }
         }
+
+        var loading_panel = new JPanel(); 
+        {
+            var label = new JPanel();
+            label.add(new JLabel("""
+                <html>
+                    <h1>Discord Bot Client</h1>
+                    <p>Loading...</p>
+                </html>
+                """));
+            loading_panel.add(label);
+        }
+
+        frame.setContentPane(loading_panel);
+        frame.pack();
+        frame.setVisible(true);
+
+
         var api = login(config_path.resolve("config.json"));
+
+        frame.setVisible(false);
 
         var media_cache_path = Path.of(dirs.cacheDir, "media");
         if (!Files.exists(media_cache_path)) {
@@ -107,7 +127,7 @@ public class Main {
         MediaCache.loadStorageCache(media_cache_path);
 
 
-        panel.add(
+        main_panel.add(
             new DiscordView(
                 api
             ),
@@ -115,13 +135,13 @@ public class Main {
         );
 
         // frame.pack();
-        panel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        frame.getContentPane().add(panel, BorderLayout.CENTER);
+        main_panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        frame.setContentPane(main_panel);
         frame.setSize(900, 700);
         frame.revalidate();
-        SwingUtilities.invokeLater(() -> {
+        // SwingUtilities.invokeLater(() -> {
             frame.setVisible(true);
-        });
+        // });
         System.out.println("done");
     }
 
