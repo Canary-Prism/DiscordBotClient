@@ -78,12 +78,12 @@ public class ServerListView extends JComponent {
     protected JComponent createServerItemView(Server server) {
         var view = new JComponent() {
 
-            private Image icon;
+            private volatile Image icon;
 
             static final int pfp = 45;
 
             {
-                // Thread.ofVirtual().start(() -> {
+                Thread.ofVirtual().start(() -> {
                     mewo: try {
                         if (server.getIcon().isEmpty()) {
                             break mewo;
@@ -93,7 +93,7 @@ public class ServerListView extends JComponent {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                // });
+                });
             }
 
 
