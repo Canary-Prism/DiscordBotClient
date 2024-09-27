@@ -566,7 +566,7 @@ public class TextView extends JComponent {
                         if (!sb.isEmpty()) {
                             createJLabel(str);
                             sb.setLength(0);
-                        } else if (split_text.equals(split[j + 1])) {
+                        } else if (metrics.stringWidth(split[j + 1]) > this.getWidth()) {
                             continue;
                         }
                         
