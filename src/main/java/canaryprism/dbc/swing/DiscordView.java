@@ -11,7 +11,10 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
+import java.nio.channels.Channel;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -32,7 +35,7 @@ public class DiscordView extends JComponent {
 
     private final CardLayout server_card = new CardLayout();
     private final JPanel server_view_panel = new JPanel(server_card);
-    private final Set<String> loaded_servers = new HashSet<>();
+    private final Map<String, ServerView> loaded_servers = new HashMap<>();
 
     private Server selected_server;
 
@@ -146,9 +149,10 @@ public class DiscordView extends JComponent {
     public void showServer(Server server) {
         var id = server.getIdAsString();
 
-        if (!loaded_servers.contains(id)) {
-            server_view_panel.add(createServerView(server), id);
-            loaded_servers.add(id);
+        if (!loaded_servers.containsKey(id)) {
+            var view = createServerView(server);
+            server_view_panel.add(view, id);
+            loaded_servers.put(id, view);
         }
         server_card.show(server_view_panel, id);
         selected_server = server;
@@ -157,7 +161,15 @@ public class DiscordView extends JComponent {
         this.repaint();
     }
 
-    protected JComponent createServerView(Server s) {
+    public Server getSelectedServer() {
+        return selected_server;
+    }
+
+    public ServerView getSelectedServerView() {
+        return (ServerView) loaded_servers.get(selected_server.getIdAsString());
+    }
+
+    protected ServerView createServerView(Server s) {
         return new ServerView(s);
     }
 }

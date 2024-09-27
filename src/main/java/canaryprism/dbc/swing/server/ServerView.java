@@ -132,6 +132,10 @@ public class ServerView extends JComponent {
         this.repaint();
     }
 
+    public Channel getSelectedChannel() {
+        return selected_channel;
+    }
+
     protected JComponent createChannelView(Channel c) {
         return switch (c) {
             case ServerTextChannel channel when channel.canYouSee() -> {

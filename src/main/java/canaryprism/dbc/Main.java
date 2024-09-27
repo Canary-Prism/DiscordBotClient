@@ -1,6 +1,7 @@
 package canaryprism.dbc;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +24,7 @@ import org.json.JSONObject;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
 import canaryprism.dbc.swing.DiscordView;
+import canaryprism.dbc.swing.message.MessageView;
 import dev.dirs.ProjectDirectories;
 
 public class Main {
@@ -112,6 +114,19 @@ public class Main {
 
         frame.setVisible(false);
 
+        var lost_connection_panel = new JPanel();
+        {
+            var label = new JPanel();
+            label.add(new JLabel("""
+                <html>
+                    <h1>Discord Bot Client</h1>
+                    <p>Lost connection to Discord</p>
+                    <p>Attempting to reconnect...</p>
+                </html>
+                """));
+            lost_connection_panel.add(label);
+        }
+
         var media_cache_path = Path.of(dirs.cacheDir, "media");
         if (!Files.exists(media_cache_path)) {
             try {
@@ -142,8 +157,53 @@ public class Main {
         // SwingUtilities.invokeLater(() -> {
             frame.setVisible(true);
         // });
+
+        api.addLostConnectionListener((e) -> {
+            SwingUtilities.invokeLater(() -> {
+                frame_size = frame.getSize();
+                frame.setContentPane(lost_connection_panel);
+                frame.pack();
+                frame.revalidate();
+                frame.repaint();
+            });
+        });
+
+        api.addResumeListener((e) -> {
+            SwingUtilities.invokeLater(() -> {
+                frame.setContentPane(main_panel);
+                frame.setSize(frame_size);
+                frame.revalidate();
+                frame.repaint();
+            });
+        });
+
+        api.addReconnectListener((e) -> {
+            SwingUtilities.invokeLater(() -> {
+                var view = (DiscordView) main_panel.getComponent(0);
+
+                main_panel.removeAll();
+                
+                var selected_server = view.getSelectedServer();
+                var selected_channel = view.getSelectedServerView().getSelectedChannel();
+                
+                var new_view = new DiscordView(api);
+                main_panel.add(new_view, BorderLayout.CENTER);
+
+                new_view.showServer(selected_server);
+                new_view.getSelectedServerView().showChannel(selected_channel);
+
+
+                frame.setContentPane(main_panel);
+                frame.setSize(frame_size);
+                frame.revalidate();
+                frame.repaint();
+            });
+        });
+
         System.out.println("done");
     }
+    
+    private static Dimension frame_size;
 
     private static DiscordApi login(Path path) {
         String token = "";
