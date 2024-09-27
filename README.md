@@ -24,6 +24,17 @@ This program uses Java 21
 
 ## Historical Changelog
 
+### 1.2.0
+- improved spaceng for messages with replies
+- improved how reference messages look
+- added more markdown support
+- made the title bar thing appear in dark mode on macOS if the default dark laf is used
+- improved and fixed text wrapping
+- improved autoscroll
+- fixed message rendering on windows and improved background rendering
+- added loading window at the start
+- added reconnect and resume support
+
 ### 1.1.0
 - actually uses Java 21 now
 - improved autoscrolling
