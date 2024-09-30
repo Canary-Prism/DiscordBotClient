@@ -144,7 +144,10 @@ public class MessageListView extends JComponent {
 
         // message_list.setSize(500, 500);
 
-        var scroll_pane = new JScrollPane(message_list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+        var wrapping_panel = new JPanel(new BorderLayout());
+        wrapping_panel.add(message_list, BorderLayout.SOUTH);
+
+        var scroll_pane = new JScrollPane(wrapping_panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // scroll_pane.setSize(500, 500);
