@@ -198,7 +198,7 @@ public class InteractableMessageListView extends JComponent {
             });
         }
 
-        if (message.canYouDelete()) {
+        if (message.canYouDelete() || message.getAuthor().getId() == channel.getApi().getYourself().getId()) {
             var delete_item = context_menu.add("Delete");
             delete_item.addActionListener((e) -> {
                 message.delete();
