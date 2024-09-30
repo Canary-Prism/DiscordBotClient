@@ -57,6 +57,33 @@ public class MemberListView extends JComponent {
                 member_list.repaint();
             }
         });
+
+        if (channel instanceof ServerChannel server_channel) {
+            server_channel.getServer().addRoleChangeHoistListener((e) -> {
+                reloadList();
+            });
+            server_channel.getServer().addRoleChangePositionListener((e) -> {
+                reloadList();
+            });
+            server_channel.getServer().addRoleChangeColorListener((e) -> {
+                reloadList();
+            });
+            server_channel.getServer().addServerMemberJoinListener((e) -> {
+                reloadList();
+            });
+            server_channel.getServer().addServerMemberLeaveListener((e) -> {
+                reloadList();
+            });
+            server_channel.getServer().addUserChangeStatusListener((e) -> {
+                reloadList();
+            });
+            server_channel.getServer().addUserRoleAddListener((e) -> {
+                reloadList();
+            });
+            server_channel.getServer().addUserRoleRemoveListener((e) -> {
+                reloadList();
+            });
+        }
     }
 
     private Message last_new;
