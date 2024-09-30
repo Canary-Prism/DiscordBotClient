@@ -37,7 +37,10 @@ public class ServerListView extends JComponent {
 
         reloadList();
 
-        var scroll_pane = new JScrollPane(server_list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+        var wrapping_panel = new JPanel(new BorderLayout());
+        wrapping_panel.add(server_list, BorderLayout.NORTH);
+
+        var scroll_pane = new JScrollPane(wrapping_panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // scroll_pane.setSize(500, 500);
