@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -36,7 +38,10 @@ public class MemberListView extends JComponent {
 
         reloadList();
 
-        var scroll_pane = new JScrollPane(member_list, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+        var wrapping_panel = new JPanel(new BorderLayout());
+        wrapping_panel.add(member_list, BorderLayout.NORTH);
+
+        var scroll_pane = new JScrollPane(wrapping_panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // scroll_pane.setSize(500, 500);
