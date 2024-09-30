@@ -114,6 +114,21 @@ public class MessageView extends JComponent {
             repaint();
         });
 
+        message.getAuthor().asUser().ifPresent((user) -> {
+            user.addUserChangeAvatarListener((e) -> Thread.ofVirtual().start(() -> {
+                image = MediaCache.getImage("author_pfp", message.getAuthor(), (g) -> g.getAvatar(64).getUrl());
+                repaint();
+            }));
+
+            user.addUserChangeNameListener((e) -> {
+                repaint();
+            });
+
+            user.addUserChangeNicknameListener((e) -> {
+                repaint();
+            });
+        });
+
         message.addMessageEditListener((e) -> {
             edited = true;
 
