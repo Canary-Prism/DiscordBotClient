@@ -2,6 +2,7 @@ package canaryprism.dbc.save.channels;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -63,6 +64,9 @@ public class ChannelSaveSystem {
             property.set(data, value);
         } else {
             var data = new JSONObject();
+            if (Objects.equals(property.get(Optional.empty()), value)) {
+                return; // No need to save default value
+            }
             property.set(data, value);
             JSONSaveSystem.put(pathFor(channel), data);
         }
