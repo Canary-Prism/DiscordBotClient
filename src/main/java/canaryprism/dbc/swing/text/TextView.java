@@ -257,6 +257,12 @@ public class TextView extends JComponent {
                 }
                 case Node.ELEMENT_NODE -> {
                     switch (child.getNodeName()) {
+                        case "br" -> {
+                            x = 0;
+                            var metrics = this.getFontMetrics(this.getFont());
+                            yinc = metrics.getHeight() - metrics.getDescent() + metrics.getMaxDescent();
+                            y += metrics.getHeight();
+                        }
                         case "b" -> {
                             var font = this.getFont();
                             this.setFont(font.deriveFont(this.getFont().getStyle() | java.awt.Font.BOLD));
@@ -292,6 +298,31 @@ public class TextView extends JComponent {
                             code = false;
                             this.setFont(font);
                         }
+
+                        case "h1" -> {
+                            var font = this.getFont();
+                            this.setFont(font.deriveFont(24f));
+                            parse(child);
+                            this.setFont(font);
+                        }
+                        case "h2" -> {
+                            var font = this.getFont();
+                            this.setFont(font.deriveFont(20f));
+                            parse(child);
+                            this.setFont(font);
+                        }
+                        case "h3" -> {
+                            var font = this.getFont();
+                            this.setFont(font.deriveFont(16f));
+                            parse(child);
+                            this.setFont(font);
+                        }
+
+                        case "quote" -> {
+                            // i'll do this later
+                            parse(child);
+                        }
+
                         case "atch" -> {
                             // if (true) continue;
                             try {
