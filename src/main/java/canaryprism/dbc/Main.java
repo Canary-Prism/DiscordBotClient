@@ -1,6 +1,7 @@
 package canaryprism.dbc;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,6 +31,14 @@ import dev.dirs.ProjectDirectories;
 public class Main {
     static {
         ImageIO.scanForPlugins();
+    }
+
+    public static final boolean debug;
+    public static Color hashColor(Class<?> type) {
+        return new Color(type.getCanonicalName().hashCode());
+    }
+    static {
+        debug = (System.getProperty("canaryprism.dbc.debug") != null);
     }
 
     // static void printNode(Node node) {
@@ -162,7 +171,7 @@ public class Main {
             SwingUtilities.invokeLater(() -> {
                 frame_size = frame.getSize();
                 frame.setContentPane(lost_connection_panel);
-                frame.pack();
+
                 frame.revalidate();
                 frame.repaint();
             });
@@ -171,7 +180,7 @@ public class Main {
         api.addResumeListener((e) -> {
             SwingUtilities.invokeLater(() -> {
                 frame.setContentPane(main_panel);
-                frame.setSize(frame_size);
+
                 frame.revalidate();
                 frame.repaint();
             });
@@ -194,7 +203,7 @@ public class Main {
 
 
                 frame.setContentPane(main_panel);
-                frame.setSize(frame_size);
+
                 frame.revalidate();
                 frame.repaint();
             });

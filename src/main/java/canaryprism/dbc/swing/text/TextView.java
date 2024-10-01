@@ -48,6 +48,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import canaryprism.dbc.Main;
 import canaryprism.dbc.MediaCache;
 
 public class TextView extends JComponent {
@@ -71,7 +72,8 @@ public class TextView extends JComponent {
             }
         });
 
-        // this.setBorder(new LineBorder(Color.blue, 1));
+        if (Main.debug)
+            this.setBorder(new LineBorder(Main.hashColor(TextView.class), 1));
     }
 
     public void setText(String text) {
@@ -152,16 +154,17 @@ public class TextView extends JComponent {
             // label_cache_index = 0;
             strikethrough = underline = false;
 
-            // lines.clear();
+            if (lines != null)
+                lines.clear();
 
             // Thread.ofVirtual().start(() -> {
                 // System.out.println("dolayout " + System.currentTimeMillis());
                 parse(root);
 
-                var height_y = y;
-                if (x != 0) {
-                    height_y += yinc;
-                }
+                var height_y = y + yinc;
+                // if (x != 0) {
+                //     height_y += yinc;
+                // }
 
                 this.setPreferredSize(new Dimension(getWidth(), (int)(height_y)));
 
@@ -258,20 +261,20 @@ public class TextView extends JComponent {
                     for (int j = 0; j < split.length - 1; j++) {
                         placeText(split[j]);
                         x = 0;
-                        yinc = metrics.getMaxDescent();
+                        yinc = metrics.getDescent() + metrics.getLeading();
                         y += metrics.getHeight();
                     }
 
                     var last = split[split.length - 1];
                     placeText(last);
-                    yinc = metrics.getMaxDescent();
+                    yinc = metrics.getDescent() + metrics.getLeading();
                 }
                 case Node.ELEMENT_NODE -> {
                     switch (child.getNodeName()) {
                         case "br" -> {
                             x = 0;
                             var metrics = this.getFontMetrics(this.getFont());
-                            yinc = metrics.getHeight() - metrics.getDescent() + metrics.getMaxDescent();
+                            yinc = metrics.getDescent() + metrics.getLeading();
                             y += metrics.getHeight();
                         }
                         case "b" -> {
@@ -679,8 +682,8 @@ public class TextView extends JComponent {
                 y += metrics.getMaxAscent() + line_metrics.getBaselineOffsets()[line_metrics.getBaselineIndex()];
             }
 
-            // if (lines != null)
-            //     lines.add((int) y);
+            if (lines != null)
+                lines.add((int) y);
     
             label.setBounds((int) x, (int) Math.round(y - metrics.getMaxAscent() + line_metrics.getBaselineOffsets()[line_metrics.getBaselineIndex()]),
                     (int) metrics.stringWidth(text), (int) metrics.getMaxAscent() + metrics.getMaxDescent() + metrics.getLeading());
@@ -692,7 +695,8 @@ public class TextView extends JComponent {
                 label.setOpaque(true);
             }
 
-            // label.setBorder(new LineBorder(Color.red, 1));
+            if (Main.debug)
+                label.setBorder(new LineBorder(Main.hashColor(label.getClass()), 1));
 
             // future.thenRun(() -> {
                 this.add(label);
@@ -759,20 +763,27 @@ public class TextView extends JComponent {
         }
     }
     
-    // private final ArrayList<Integer> lines;
+    private final ArrayList<Integer> lines;
+    {
+        if (Main.debug) {
+            this.lines = new ArrayList<>();
+        } else {
+            this.lines = null;
+        }
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // if (lines == null)
-        //     return;
+        if (lines == null)
+            return;
         
-        // g.setColor(Color.cyan);
+        g.setColor(Color.cyan);
 
-        // for (var y : lines) {
-        //     g.drawLine(0, y, getWidth(), y);
-        // }
+        for (var y : lines) {
+            g.drawLine(0, y, getWidth(), y);
+        }
     }
 
     public static Document parseXML(String xmlContent) throws ParserConfigurationException, SAXException, IOException {
