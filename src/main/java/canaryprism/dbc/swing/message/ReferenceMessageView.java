@@ -76,7 +76,7 @@ public class ReferenceMessageView extends JComponent {
     public void doLayout() {
         super.doLayout();
         var x = pfp + 5;
-        var y = this.getHeight() / 2 - this.getFontMetrics(this.getFont()).getHeight() / 2 - 7;
+        var y = this.getHeight() / 2 - this.getFontMetrics(this.getFont()).getHeight() / 2 - 1;
 
         text_pane.setBounds(x, y, this.getWidth() - x, this.getHeight() - y);
         text_pane.doLayout();

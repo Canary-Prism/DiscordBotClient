@@ -303,7 +303,7 @@ public class MessageView extends JComponent {
         // reloadText();
         
         var x = pfp + 10 + 5;
-        var y = 8 + 3;
+        var y = 3;
 
         creation_label.setFont(getFont().deriveFont(10f));
         if (!shows_author) {
@@ -323,7 +323,7 @@ public class MessageView extends JComponent {
 
 
         if (!is_editing) {
-            y -= text_pane.getFontMetrics(text_pane.getFont()).getAscent();
+            // y -= text_pane.getFontMetrics(text_pane.getFont()).getAscent();
             text_pane.setBounds( // only set bounds here because holy shit this takes so long to set bouns
                 (int)x, 
                 (int)y, 
