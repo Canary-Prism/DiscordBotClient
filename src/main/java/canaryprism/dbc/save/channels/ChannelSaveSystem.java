@@ -17,7 +17,15 @@ public class ChannelSaveSystem {
     private static final Path channels_path = Path.of("channels");
     public static class Property<T> {
 
-        public static final Property<Optional<JSONObject>> self = new Property<>(Function.identity(), (e, v) -> {});
+        public static final Property<Optional<JSONObject>> self = new Property<>(Function.identity(), (e, v) -> {
+            e.clear();
+            if (v.isPresent()) {
+                var value = v.get();
+                for (var key : value.keySet()) {
+                    e.put(key, value.get(key));
+                }
+            }
+        });
 
         public static final Property<Boolean> expanded = new Property<>(
             (o) -> o.map((e) -> e.optBoolean("expanded", true)).orElse(true), 
