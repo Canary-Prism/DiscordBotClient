@@ -19,7 +19,7 @@ public class ChannelSaveSystem {
 
         public static final Property<Optional<JSONObject>> self = new Property<>(Function.identity(), (e, v) -> {});
 
-        public static final Property<Boolean> collapsed = new Property<>(
+        public static final Property<Boolean> expanded = new Property<>(
             (o) -> o.map((e) -> e.optBoolean("expanded", true)).orElse(true), 
             (o, v) -> o.put("expanded", v)
         );
