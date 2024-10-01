@@ -61,6 +61,9 @@ public class ChannelSaveSystem {
         var opt = ChannelSaveSystem.get(channel);
         if (opt.isPresent()) {
             var data = opt.get();
+            if (Objects.equals(property.get(opt), value)) {
+                return; // No need to save default value
+            }
             property.set(data, value);
         } else {
             var data = new JSONObject();
