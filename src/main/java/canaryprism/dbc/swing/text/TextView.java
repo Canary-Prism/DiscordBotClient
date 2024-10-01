@@ -1,8 +1,10 @@
 package canaryprism.dbc.swing.text;
 
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -19,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -31,6 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -66,6 +70,8 @@ public class TextView extends JComponent {
                 doLayout();
             }
         });
+
+        this.setBorder(new LineBorder(Color.blue, 1));
     }
 
     public void setText(String text) {
@@ -142,17 +148,22 @@ public class TextView extends JComponent {
                 return;
             }
 
-            x = 0; y = 5;
+            x = 0; y = 0;
             // label_cache_index = 0;
             strikethrough = underline = false;
+
+            // lines.clear();
 
             // Thread.ofVirtual().start(() -> {
                 // System.out.println("dolayout " + System.currentTimeMillis());
                 parse(root);
 
-                height_y = y + yinc + this.getFontMetrics(this.getFont()).getMaxDescent();
+                var height_y = y;
+                if (x != 0) {
+                    height_y += yinc;
+                }
 
-                this.setPreferredSize(new Dimension(getWidth(), (int)(y + yinc)));
+                this.setPreferredSize(new Dimension(getWidth(), (int)(height_y)));
 
                 // this.invalidate();
                 // this.revalidate();
@@ -247,13 +258,13 @@ public class TextView extends JComponent {
                     for (int j = 0; j < split.length - 1; j++) {
                         placeText(split[j]);
                         x = 0;
-                        yinc = metrics.getHeight() - metrics.getDescent() + metrics.getMaxDescent();
+                        yinc = metrics.getMaxDescent();
                         y += metrics.getHeight();
                     }
 
                     var last = split[split.length - 1];
-                    yinc = metrics.getHeight() - metrics.getDescent() + metrics.getMaxDescent();
                     placeText(last);
+                    yinc = metrics.getMaxDescent();
                 }
                 case Node.ELEMENT_NODE -> {
                     switch (child.getNodeName()) {
@@ -606,8 +617,6 @@ public class TextView extends JComponent {
 
                         x = 0;
 
-                        yinc = line_metrics.getHeight() - line_metrics.getDescent() + metrics.getMaxDescent();
-
                         y += line_metrics.getHeight();
 
                         split[j] = "";
@@ -665,8 +674,15 @@ public class TextView extends JComponent {
     
             label.setFont(this.getFont());
             // label.setBorder(new LineBorder(Color.red, 1));
+
+            if (y == 0) {
+                y += metrics.getMaxAscent() + line_metrics.getBaselineOffsets()[line_metrics.getBaselineIndex()];
+            }
+
+            // if (lines != null)
+            //     lines.add((int) y);
     
-            label.setBounds((int) x, (int) Math.round(y - metrics.getMaxAscent() + 12 + line_metrics.getBaselineOffsets()[line_metrics.getBaselineIndex()]),
+            label.setBounds((int) x, (int) Math.round(y - metrics.getMaxAscent() + line_metrics.getBaselineOffsets()[line_metrics.getBaselineIndex()]),
                     (int) metrics.stringWidth(text), (int) metrics.getMaxAscent() + metrics.getMaxDescent() + metrics.getLeading());
             sb.setLength(0);
     
@@ -675,6 +691,8 @@ public class TextView extends JComponent {
                 label.setBackground(this.getBackground().darker());
                 label.setOpaque(true);
             }
+
+            label.setBorder(new LineBorder(Color.red, 1));
 
             // future.thenRun(() -> {
                 this.add(label);
@@ -741,6 +759,22 @@ public class TextView extends JComponent {
         }
     }
     
+    // private final ArrayList<Integer> lines;
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        // if (lines == null)
+        //     return;
+        
+        // g.setColor(Color.cyan);
+
+        // for (var y : lines) {
+        //     g.drawLine(0, y, getWidth(), y);
+        // }
+    }
+
     public static Document parseXML(String xmlContent) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
