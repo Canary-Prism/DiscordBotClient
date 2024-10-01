@@ -24,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
+import canaryprism.dbc.save.SaveSystem;
 import canaryprism.dbc.swing.DiscordView;
 import canaryprism.dbc.swing.message.MessageView;
 import dev.dirs.ProjectDirectories;
@@ -149,6 +150,8 @@ public class Main {
             }
         }
         MediaCache.loadStorageCache(media_cache_path);
+
+        SaveSystem.setDirectory(Path.of(dirs.dataDir));
 
 
         main_panel.add(
