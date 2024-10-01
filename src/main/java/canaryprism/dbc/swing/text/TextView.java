@@ -71,7 +71,7 @@ public class TextView extends JComponent {
             }
         });
 
-        this.setBorder(new LineBorder(Color.blue, 1));
+        // this.setBorder(new LineBorder(Color.blue, 1));
     }
 
     public void setText(String text) {
@@ -692,7 +692,7 @@ public class TextView extends JComponent {
                 label.setOpaque(true);
             }
 
-            label.setBorder(new LineBorder(Color.red, 1));
+            // label.setBorder(new LineBorder(Color.red, 1));
 
             // future.thenRun(() -> {
                 this.add(label);
