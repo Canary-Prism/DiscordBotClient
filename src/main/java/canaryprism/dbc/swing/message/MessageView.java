@@ -308,7 +308,7 @@ public class MessageView extends JComponent {
         creation_label.setFont(getFont().deriveFont(10f));
         if (!shows_author) {
             // this is stupid but it works
-            var y1 = y - creation_label.getFontMetrics(creation_label.getFont()).getAscent() / 2;
+            var y1 = y + 2;
             creation_label.setBounds(5, (int)y1, width - (int) x, height - (int) y1);
         }
 
