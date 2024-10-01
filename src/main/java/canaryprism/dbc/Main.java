@@ -152,6 +152,7 @@ public class Main {
         MediaCache.loadStorageCache(media_cache_path);
 
         SaveSystem.setDirectory(Path.of(dirs.dataDir));
+        SaveSystem.registerShutdownHook();
 
 
         main_panel.add(
