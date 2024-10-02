@@ -10,10 +10,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+
 import org.javacord.api.entity.channel.ChannelCategory;
 import org.javacord.api.entity.channel.RegularServerChannel;
 import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.server.Server;
+
+import canaryprism.dbc.Main;
 
 public class ServerChannelListView extends JComponent {
 
@@ -76,6 +80,9 @@ public class ServerChannelListView extends JComponent {
         var view = new JLabel(channel.getName());
 
         var panel = new JPanel(new BorderLayout());
+
+        if (Main.debug)
+            view.setBorder(new LineBorder(Main.hashColor(view.getClass())));
 
         panel.setBorder(new EmptyBorder(2, 2, 2, 2));
         panel.add(view, BorderLayout.CENTER);

@@ -10,6 +10,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+
 import org.javacord.api.entity.channel.ChannelCategory;
 import org.javacord.api.entity.channel.ServerChannel;
 
@@ -58,6 +60,10 @@ public class ChannelCategoryView extends JComponent {
         this.expanded = ChannelSaveSystem.get(category, Property.expanded);
 
         updateChannelList();
+
+        if (Main.debug) {
+            this.setBorder(new LineBorder(Main.hashColor(ChannelCategoryView.class)));
+        }
     }
 
     private void updateChannelList() {
@@ -87,6 +93,9 @@ public class ChannelCategoryView extends JComponent {
 
         view.setAlignmentX(LEFT_ALIGNMENT);
         // view.setBorder(new LineBorder(Color.blue, 1));
+        
+        if (Main.debug) 
+            view.setBorder(new LineBorder(Main.hashColor(view.getClass())));
 
         
         // panel.setBorder(new LineBorder(Color.red, 1));

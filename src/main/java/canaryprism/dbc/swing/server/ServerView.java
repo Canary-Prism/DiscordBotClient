@@ -13,6 +13,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.ChannelCategory;
@@ -23,6 +24,7 @@ import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.channel.TextableRegularServerChannel;
 import org.javacord.api.entity.server.Server;
 
+import canaryprism.dbc.Main;
 import canaryprism.dbc.swing.channel.ServerTextableChannelView;
 import canaryprism.dbc.swing.channel.channellist.ChannelCategoryView;
 import canaryprism.dbc.swing.channel.channellist.ServerChannelListView;
@@ -60,6 +62,9 @@ public class ServerView extends JComponent {
                     }
                 });
 
+                if (Main.debug)
+                    view.setBorder(new LineBorder(Main.hashColor(view.getClass())));
+
                 panel.setBorder(new EmptyBorder(2, 2, 2, 2));
                 panel.add(view);
                 panel.setAlignmentX(LEFT_ALIGNMENT);
@@ -88,6 +93,9 @@ public class ServerView extends JComponent {
                             }
                         });
 
+                        if (Main.debug)
+                            view.setBorder(new LineBorder(Main.hashColor(view.getClass())));
+
                         panel.setBorder(new EmptyBorder(2, 2, 2, 2));
                         panel.add(view);
                         panel.setAlignmentX(LEFT_ALIGNMENT);
@@ -96,6 +104,8 @@ public class ServerView extends JComponent {
                     }
                 };
 
+                if (Main.debug)
+                    view.setBorder(new LineBorder(Main.hashColor(view.getClass())));
 
                 // view.setBorder(new LineBorder(Color.red, 1));
 
