@@ -1,9 +1,11 @@
 package canaryprism.dbc.swing.channel.memberlist;
 
+import java.awt.AlphaComposite;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.geom.Ellipse2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
 
@@ -46,11 +48,25 @@ public class MemberListServerMemberView extends JComponent {
 
         // g.scale(scale, scale);
 
-        {
+        if (image != null) {
             var g2 = (Graphics2D) g.create();
 
-            g2.clip(new Ellipse2D.Double(0, 0, pfp, pfp));
-            g2.drawImage(image, 0, 0, pfp, pfp, this);
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
+            var buffered_image = new BufferedImage(image.getWidth(this), image.getHeight(this),
+                    BufferedImage.TYPE_INT_ARGB);
+            var bg2 = buffered_image.createGraphics();
+            bg2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            bg2.fillOval(0, 0, image.getWidth(this), image.getHeight(this));
+
+            var alpha = AlphaComposite.getInstance(AlphaComposite.SRC_IN, 1f);
+
+            bg2.setComposite(alpha);
+
+            bg2.drawImage(image, 0, 0, image.getWidth(this), image.getHeight(this), this);
+
+            g2.drawImage(buffered_image, 0, 0, pfp, pfp, this);
         }
 
         var x = pfp + 10;
