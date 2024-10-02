@@ -32,6 +32,7 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
@@ -150,7 +151,7 @@ public class TextView extends JComponent {
                 return;
             }
 
-            x = 0; y = 0;
+            x = carriageReturn(); y = 0;
             // label_cache_index = 0;
             strikethrough = underline = false;
 
@@ -202,7 +203,7 @@ public class TextView extends JComponent {
 
     private double x, y;
     private double yinc;
-    private boolean strikethrough, underline, small, code;
+    private boolean strikethrough, underline, small, code, quote;
 
     private final Map<String, URL> media_cache = new HashMap<>();
 
@@ -239,6 +240,18 @@ public class TextView extends JComponent {
     // private int label_cache_index = 0;
 
     // private final ArrayList<JLabel> label_cache = new ArrayList<>();
+
+    private double carriageReturn() {
+        return (quote) ? 10 : 0;
+    }
+
+    private void lineFeed() {
+        var metrics = this.getFontMetrics(this.getFont());
+
+        x = carriageReturn(); // because we aren't windows smh
+        y += metrics.getHeight();
+        yinc = metrics.getDescent() + metrics.getLeading();
+    }
     
     private void parse(Node node) {
         var children = node.getChildNodes();
@@ -260,7 +273,7 @@ public class TextView extends JComponent {
 
                     for (int j = 0; j < split.length - 1; j++) {
                         placeText(split[j]);
-                        x = 0;
+                        x = carriageReturn();
                         yinc = metrics.getDescent() + metrics.getLeading();
                         y += metrics.getHeight();
                     }
@@ -272,7 +285,7 @@ public class TextView extends JComponent {
                 case Node.ELEMENT_NODE -> {
                     switch (child.getNodeName()) {
                         case "br" -> {
-                            x = 0;
+                            x = carriageReturn();
                             var metrics = this.getFontMetrics(this.getFont());
                             yinc = metrics.getDescent() + metrics.getLeading();
                             y += metrics.getHeight();
@@ -333,8 +346,12 @@ public class TextView extends JComponent {
                         }
 
                         case "quote" -> {
-                            // i'll do this later
+                            if (!(x < carriageReturn() && y == 0)) {
+                                x = carriageReturn();
+                            }
+                            this.quote = true;
                             parse(child);
+                            this.quote = false;
                         }
 
                         case "atch" -> {
@@ -347,8 +364,8 @@ public class TextView extends JComponent {
                                     continue;
                                 }
 
-                                if (x > 0) {
-                                    x = 0;
+                                if (x > carriageReturn()) {
+                                    x = carriageReturn();
                                     y += yinc;
                                 }
                                 var url = attachment.getUrl();
@@ -534,7 +551,7 @@ public class TextView extends JComponent {
 
                                 yinc = image.getHeight(this) * scale;
                                 if (x + image.getWidth(this) * scale > this.getWidth()) {
-                                    x = 0;
+                                    x = carriageReturn();
                                     y += image.getHeight(this) * scale;
                                 }
 
@@ -558,6 +575,9 @@ public class TextView extends JComponent {
     }
 
     private void placeText(String text) {
+        if (quote && x == 0) {
+            x = carriageReturn(); // really hacky way of doing it but whatever please fix if anything other than quotes gets added as a line shifting line dominating format thanks :3
+        }
         var font = this.getFont();
         var metrics = this.getFontMetrics(font);
 
@@ -594,7 +614,7 @@ public class TextView extends JComponent {
 
                             int k = 0;
 
-                            if (x == 0) { // if it's already a new line, we *must* add at least one character
+                            if (x == carriageReturn()) { // if it's already a new line, we *must* add at least one character
                                 sb.append(split_text.charAt(k++));
                             }
 
@@ -618,7 +638,7 @@ public class TextView extends JComponent {
 
                         var line_metrics = metrics.getLineMetrics(str, getGraphics());
 
-                        x = 0;
+                        x = carriageReturn();
 
                         y += line_metrics.getHeight();
 
@@ -678,8 +698,21 @@ public class TextView extends JComponent {
             label.setFont(this.getFont());
             // label.setBorder(new LineBorder(Color.red, 1));
 
+            
             if (y == 0) {
                 y += metrics.getMaxAscent() + line_metrics.getBaselineOffsets()[line_metrics.getBaselineIndex()];
+            }
+
+            if (quote && x == carriageReturn()) {
+                var quote = new JPanel();
+                quote.setBackground(Color.lightGray);
+                quote.setOpaque(true);
+                quote.setBounds(0, (int) Math.round(y + line_metrics.getBaselineOffsets()[line_metrics.getBaselineIndex()] - metrics.getAscent()), 3, (int) line_metrics.getHeight());
+
+                if (Main.debug)
+                    quote.setBorder(new LineBorder(Main.hashColor(quote.getClass()), 1));
+
+                this.add(quote);
             }
 
             if (lines != null)
