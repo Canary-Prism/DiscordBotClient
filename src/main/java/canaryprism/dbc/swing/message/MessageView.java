@@ -9,6 +9,7 @@ import javax.swing.JTextArea;
 import org.apache.commons.text.StringEscapeUtils;
 import org.javacord.api.entity.message.Message;
 
+import canaryprism.dbc.Main;
 import canaryprism.dbc.MediaCache;
 import canaryprism.dbc.markdown.DiscordMarkdown;
 import canaryprism.dbc.swing.text.TextView;
@@ -209,6 +210,11 @@ public class MessageView extends JComponent {
         edit_panel.setVisible(false);
 
         this.add(edit_panel);
+
+
+        if (Main.debug) {
+            this.setBorder(new javax.swing.border.LineBorder(Main.hashColor(MessageView.class), 1));
+        }
     }
 
     public void setEditing(boolean is_editing) {
