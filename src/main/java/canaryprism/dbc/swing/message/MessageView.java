@@ -488,8 +488,24 @@ public class MessageView extends JComponent {
         if (shows_author) {
             var g2 = (Graphics2D) g.create();
 
-            g2.clip(new Ellipse2D.Double(x, y, pfp, pfp));
-            g2.drawImage(image, x, y, pfp, pfp, this);
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
+            g2.translate(x, y);
+
+            var buffered_image = new BufferedImage(image.getWidth(this), image.getHeight(this), BufferedImage.TYPE_INT_ARGB);
+            var bg2 = buffered_image.createGraphics();
+            bg2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            bg2.fillOval(0, 0, image.getWidth(this), image.getHeight(this));
+
+            var alpha = AlphaComposite.getInstance(AlphaComposite.SRC_IN,1f);
+
+            bg2.setComposite(alpha);
+
+            bg2.drawImage(image, 0, 0, image.getWidth(this), image.getHeight(this), this);
+
+            
+            g2.drawImage(buffered_image, 0, 0, pfp, pfp, this);
         }
 
         x += pfp + 10;
