@@ -485,7 +485,7 @@ public class MessageView extends JComponent {
 
         }
 
-        if (shows_author) {
+        if (shows_author && image != null) {
             var g2 = (Graphics2D) g.create();
 
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
