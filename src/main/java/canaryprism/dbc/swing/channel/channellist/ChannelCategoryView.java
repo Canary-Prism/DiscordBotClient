@@ -46,6 +46,10 @@ public class ChannelCategoryView extends JComponent {
         header.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         header.setHorizontalAlignment(SwingConstants.LEFT);
 
+        if (Main.debug) {
+            header.setBorder(new LineBorder(Main.hashColor(header.getClass())));
+        }
+
         // header.setBorder(new LineBorder(Color.blue, 1));
         this.add(header);
         
