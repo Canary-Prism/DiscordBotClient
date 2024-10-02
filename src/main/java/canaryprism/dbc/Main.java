@@ -36,7 +36,7 @@ public class Main {
 
     public static final boolean debug;
     public static Color hashColor(Class<?> type) {
-        return new Color(type.getCanonicalName().hashCode());
+        return new Color(type.getName().hashCode());
     }
     static {
         debug = (System.getProperty("canaryprism.dbc.debug") != null);
