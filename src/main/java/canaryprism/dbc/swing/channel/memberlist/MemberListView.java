@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.PrivateChannel;
@@ -22,6 +23,8 @@ import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.user.UserStatus;
+
+import canaryprism.dbc.Main;
 
 public class MemberListView extends JComponent {
 
@@ -60,30 +63,41 @@ public class MemberListView extends JComponent {
 
         if (channel instanceof ServerChannel server_channel) {
             server_channel.getServer().addRoleChangeHoistListener((e) -> {
-                reloadList();
+                revalidate();
+                repaint();
             });
             server_channel.getServer().addRoleChangePositionListener((e) -> {
-                reloadList();
+                revalidate();
+                repaint();
             });
             server_channel.getServer().addRoleChangeColorListener((e) -> {
-                reloadList();
+                revalidate();
+                repaint();
             });
             server_channel.getServer().addServerMemberJoinListener((e) -> {
-                reloadList();
+                revalidate();
+                repaint();
             });
             server_channel.getServer().addServerMemberLeaveListener((e) -> {
-                reloadList();
+                revalidate();
+                repaint();
             });
             server_channel.getServer().addUserChangeStatusListener((e) -> {
-                reloadList();
+                revalidate();
+                repaint();
             });
             server_channel.getServer().addUserRoleAddListener((e) -> {
-                reloadList();
+                revalidate();
+                repaint();
             });
             server_channel.getServer().addUserRoleRemoveListener((e) -> {
-                reloadList();
+                revalidate();
+                repaint();
             });
         }
+
+        if (Main.debug)
+            this.setBorder(new LineBorder(Main.hashColor(MemberListView.class), 1));
     }
 
     private Message last_new;
@@ -170,6 +184,9 @@ public class MemberListView extends JComponent {
 
         var panel = new JPanel(new BorderLayout());
         // panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+
+        if (Main.debug)
+            view.setBorder(new LineBorder(Main.hashColor(view.getClass()), 1));
 
         panel.setBorder(new EmptyBorder(3, 5, 3, 5));
 
