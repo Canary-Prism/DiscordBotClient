@@ -24,6 +24,9 @@ This program uses Java 21
 
 ## Historical Changelog
 
+### 1.3.1
+- added anti-aliasing to referenced message drawing
+
 ### 1.3.0
 - rewrote the markdown parser to be far more robust
 - improved rendering of things when in a list so now they dont get stretched out if the list is short
