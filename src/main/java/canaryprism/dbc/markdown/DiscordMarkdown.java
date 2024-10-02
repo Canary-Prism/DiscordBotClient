@@ -2,6 +2,8 @@ package canaryprism.dbc.markdown;
 
 import java.util.regex.Pattern;
 
+import canaryprism.dbc.Main;
+
 public class DiscordMarkdown {
     public static final Pattern bold_italic = Pattern.compile("(?<!\\\\)\\*(?<!\\\\)\\*(?<!\\\\)\\*([^`]+?)(?<!\\\\)\\*(?<!\\\\)\\*(?<!\\\\)\\*");
     public static final Pattern bold = Pattern.compile("(?<!\\\\)\\*(?<!\\\\)\\*([^`]+?)(?<!\\\\)\\*(?<!\\\\)\\*");
@@ -23,7 +25,17 @@ public class DiscordMarkdown {
         code("`", "pre", true, false),
         strikethrough("~~", "s"),
         underline("__", "u"),
-        emphasis("_", "i", false, true);
+        emphasis("_", "i", false, true),
+
+        header1("# ", "h1", false, false, true, false),
+        header2("## ", "h2", false, false, true, false),
+        header3("### ", "h3", false, false, true, false),
+
+        small("-# ", "small", false, false, true, false),
+
+        quote("> ", "quote", false, false, true, true),
+        triplequote(">>> ", "quote", false, false, true, true),
+        ;
 
         /**
          * The characters that are used to denote the formatting
@@ -46,6 +58,10 @@ public class DiscordMarkdown {
          */
         public final boolean space_mandatory;
 
+        public final boolean line_dominating;
+
+        public final boolean mimicks_newline;
+
         public static final Pattern space = Pattern.compile("([^\\w\\d]|\\\\)");
 
         Formattings(String chars, String tag) {
@@ -53,10 +69,17 @@ public class DiscordMarkdown {
         }
 
         Formattings(String chars, String tag, boolean raw, boolean space_mandatory) {
+            this(chars, tag, raw, space_mandatory, false, false);
+        }
+
+        Formattings(String chars, String tag, boolean raw, boolean space_mandatory, boolean line_dominating, boolean mimicks_newline) {
             this.chars = chars;
             this.tag = tag;
             this.raw = raw;
             this.space_mandatory = space_mandatory;
+
+            this.line_dominating = line_dominating;
+            this.mimicks_newline = mimicks_newline;
         }
     }
 
@@ -67,7 +90,8 @@ public class DiscordMarkdown {
 
             var result = parseMarkdownToXHTML(chars, 0, null);
             
-            // System.out.println("Result: " + result.stringBuilder.toString());
+            if (Main.debug)
+                System.out.println("Markdown Parse Result: " + result.stringBuilder.toString());
 
             return result.stringBuilder.toString();
         } catch (Exception e) {
@@ -85,6 +109,12 @@ public class DiscordMarkdown {
         var sb = new StringBuilder();
         var end = chars.length;
 
+        var is_newline = (
+            start == 0 
+            || chars[start - 1] == '\n' 
+            || (current_formatting != null && current_formatting.mimicks_newline)
+        );
+
         char_loop: 
         while (i < end) {
             if (chars[i] == '\\' && i + 1 < end && escapable.matcher(String.valueOf(chars[i + 1])).matches()) {
@@ -94,30 +124,38 @@ public class DiscordMarkdown {
             }
 
             if (current_formatting != null && i != start) {
-                test_end: {
-                    for (int j = i, k = 0; k < current_formatting.chars.length(); j++, k++) {
-                        if (j >= end || chars[j] != current_formatting.chars.charAt(k)) {
-                            break test_end;
-                        }
-                    }
-
-                    if (current_formatting.space_mandatory) {
-                        var index = i + current_formatting.chars.length();
-                        if (index + 1 < end && chars[index] != '\\') {
-                            index++;
-                        }
-                        if (index < end && !Formattings.space.matcher(String.valueOf(chars[index])).matches()) {
-                            break test_end;
-                        }
-                    }
-
-                    // System.out.println("End of formatting: " + current_formatting.chars + " at " + i);
+                if (current_formatting.line_dominating && chars[i] == '\n') {
+                    // sb.append('\n');
                     return new ParseResult(sb, i);
+                } else {
+                    test_end: {
+                        for (int j = i, k = 0; k < current_formatting.chars.length(); j++, k++) {
+                            if (j >= end || chars[j] != current_formatting.chars.charAt(k)) {
+                                break test_end;
+                            }
+                        }
+    
+                        if (current_formatting.space_mandatory) {
+                            var index = i + current_formatting.chars.length();
+                            if (index + 1 < end && chars[index] != '\\') {
+                                index++;
+                            }
+                            if (index < end && !Formattings.space.matcher(String.valueOf(chars[index])).matches()) {
+                                break test_end;
+                            }
+                        }
+    
+                        // System.out.println("End of formatting: " + current_formatting.chars + " at " + i);
+                        return new ParseResult(sb, i);
+                    }
                 }
             }
 
             format_loop: 
             for (var formatting : Formattings.values()) {
+                if (formatting.line_dominating && !is_newline) {
+                    continue format_loop;
+                }
                 int format_start = i;
                 for (int j = 0; j < formatting.chars.length() && format_start < end; format_start++, j++) {
                     if (chars[format_start] != formatting.chars.charAt(j)) {
@@ -182,17 +220,27 @@ public class DiscordMarkdown {
                 }
                 sb.append("</").append(formatting.tag).append(">");
 
-                i = format_end + formatting.chars.length();
+                i = format_end; 
+                if (!formatting.line_dominating) i += formatting.chars.length();
 
                 continue char_loop;
             }
 
-            sb.append(chars[i]);
+            is_newline = (chars[i] == '\n');
+            if (is_newline) {
+                sb.append("<br/>");
+            } else {
+                sb.append(chars[i]);
+            }
+
 
             i++;
         }
 
         if (current_formatting != null) {
+            if (current_formatting.line_dominating) {
+                return new ParseResult(sb, end);
+            }
             // System.out.println("Failed to find end of formatting: " + current_formatting.chars);
             return new ParseResult(null, 0);
         }
