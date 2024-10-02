@@ -24,6 +24,18 @@ This program uses Java 21
 
 ## Historical Changelog
 
+### 1.3.0
+- rewrote the markdown parser to be far more robust
+- improved rendering of things when in a list so now they dont get stretched out if the list is short
+- fixed a bug where you can't delete your own messages sometimes
+- some stuff automatically refresh and update now (like member lists and message authors)
+- added support for headers, antiheaders (`-# ` in discord), and quotes
+- yet more text rendering improvements
+- added a `-Dcanaryprism.dbc.debug` property which can be set to output more info to stdout and show bounding boxes on components that support it
+- added a save data system that can store persistent data, currently only used to store channel category collapse state
+- added a confirm prompt when deleting a message which you can bypass by holding shift like in discord's client
+- rewrote all code drawing images to now be anti-aliased
+
 ### 1.2.0
 - improved spaceng for messages with replies
 - improved how reference messages look
