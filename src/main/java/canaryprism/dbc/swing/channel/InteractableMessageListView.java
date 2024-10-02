@@ -1,6 +1,7 @@
 package canaryprism.dbc.swing.channel;
 
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.border.LineBorder;
 import javax.swing.event.PopupMenuEvent;
@@ -12,6 +13,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -200,7 +202,20 @@ public class InteractableMessageListView extends JComponent {
 
         if (message.canYouDelete() || message.getAuthor().getId() == channel.getApi().getYourself().getId()) {
             var delete_item = context_menu.add("Delete");
+            delete_item.setForeground(Color.red);
             delete_item.addActionListener((e) -> {
+                if ((e.getModifiers() & ActionEvent.SHIFT_MASK) == 0) {
+                    var result = JOptionPane.showConfirmDialog(
+                        InteractableMessageListView.this,
+                        "Are you sure you want to delete this message? (hold shift to bypass)",
+                        "Delete Message",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                    if (result != JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                }
                 message.delete();
             });
         }
