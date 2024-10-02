@@ -17,6 +17,9 @@ public class ChannelSaveSystem {
     private static final Path channels_path = Path.of("channels");
     public static class Property<T> {
 
+        /**
+         * the json object itself, meant as a joke :3
+         */
         public static final Property<Optional<JSONObject>> self = new Property<>(Function.identity(), (e, v) -> {
             e.clear();
             if (v.isPresent()) {
@@ -27,11 +30,17 @@ public class ChannelSaveSystem {
             }
         });
 
+        /**
+         * whether the channel is expanded or not
+         */
         public static final Property<Boolean> expanded = new Property<>(
             (o) -> o.map((e) -> e.optBoolean("expanded", true)).orElse(true), 
             (o, v) -> o.put("expanded", v)
         );
 
+        /**
+         * the last read message's timestamp (in milliseconds) (unused for now)
+         */
         public static final Property<Instant> last_msg = new Property<>(
             (o) -> o.map((e) -> Instant.ofEpochMilli(e.optLong("last_msg", 0))).orElse(Instant.EPOCH), 
             (o, v) -> o.put("last_msg", v.toEpochMilli())
