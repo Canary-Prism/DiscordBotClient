@@ -13,13 +13,17 @@ import javax.swing.border.EmptyBorder;
 import org.javacord.api.entity.channel.ChannelCategory;
 import org.javacord.api.entity.channel.ServerChannel;
 
+import canaryprism.dbc.Main;
+import canaryprism.dbc.save.channels.ChannelSaveSystem;
+import canaryprism.dbc.save.channels.ChannelSaveSystem.Property;
+
 public class ChannelCategoryView extends JComponent {
 
     private final ChannelCategory category;
 
     private final JPanel channels_panel;
 
-    private boolean expanded = true;
+    private boolean expanded;
 
     public ChannelCategoryView(ChannelCategory category) {
         this.category = category;
@@ -51,6 +55,8 @@ public class ChannelCategoryView extends JComponent {
 
         this.add(channels_panel);
 
+        this.expanded = ChannelSaveSystem.get(category, Property.expanded);
+
         updateChannelList();
     }
 
@@ -58,6 +64,8 @@ public class ChannelCategoryView extends JComponent {
         channels_panel.removeAll();
 
         var channels = category.getChannels();
+        
+        ChannelSaveSystem.set(category, Property.expanded, this.expanded);
         
         if (!expanded) {
             // TODO: the thing where it shows the channel even when collapsed if it's got unread messages
