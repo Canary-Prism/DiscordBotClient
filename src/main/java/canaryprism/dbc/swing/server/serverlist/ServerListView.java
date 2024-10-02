@@ -1,5 +1,6 @@
 package canaryprism.dbc.swing.server.serverlist;
 
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -8,6 +9,7 @@ import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
 import java.util.stream.Stream;
 
 import javax.swing.BoxLayout;
@@ -15,10 +17,12 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.server.Server;
 
+import canaryprism.dbc.Main;
 import canaryprism.dbc.MediaCache;
 import canaryprism.dbc.swing.text.TextView;
 
@@ -109,18 +113,39 @@ public class ServerListView extends JComponent {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 {
+                    final int x = 2, y = 2, w = getWidth() - 4, h = getHeight() - 4;
+
+                    final var img_size = 128;
                     var g2 = (Graphics2D) g.create();
+
+                    g2.translate(x, y);
+
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-                    g2.clip(new Ellipse2D.Double(0, 0, pfp, pfp));
+                    var buffered_image = new BufferedImage(img_size, img_size,
+                            BufferedImage.TYPE_INT_ARGB);
+                    var bg2 = buffered_image.createGraphics();
+                    bg2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+                    bg2.fillOval(0, 0, img_size, img_size);
+
+                    var alpha = AlphaComposite.getInstance(AlphaComposite.SRC_IN, 1f);
+
+                    bg2.setComposite(alpha);
+
+                    
+                    
                     if (icon != null) {
-                        g2.drawImage(icon, 0, 0, pfp, pfp, this);
+                        bg2.drawImage(icon, 0, 0, img_size, img_size, this);
+                        // g2.drawImage(icon, 0, 0, pfp, pfp, this);
                     } else {
-                        g2.setColor(java.awt.Color.GRAY);
-                        g2.fill(new Ellipse2D.Double(0, 0, pfp, pfp));
+                        bg2.setColor(java.awt.Color.GRAY);
+                        bg2.fill(new Ellipse2D.Double(0, 0, img_size, img_size));
 
-                        g2.setColor(getForeground());
+                        bg2.setColor(getForeground());
+
+                        bg2.setFont(this.getFont());
 
                         // draw the initials of the server name, this'll be a bit tricky
                         var name = server.getName();
@@ -131,28 +156,26 @@ public class ServerListView extends JComponent {
 
                         var initials = sb.toString();
 
-                        var string_width = g2.getFontMetrics().stringWidth(initials) + 5;
+                        var string_width = bg2.getFontMetrics().stringWidth(initials) + 5;
 
-                        var scale = pfp / (float) string_width;
+                        var scale = img_size / (float) string_width;
 
-                        g2.scale(scale, scale);
+                        bg2.scale(scale, scale);
 
-                        g2.drawString(initials, 2.5f, (string_width) / 2f + g2.getFontMetrics().getHeight() / 2f - g2.getFontMetrics().getDescent());
+                        bg2.drawString(initials, 2.5f, (string_width) / 2f + bg2.getFontMetrics().getHeight() / 2f - bg2.getFontMetrics().getDescent());
                     }
+
+                    g2.drawImage(buffered_image, 0, 0, w, h, this);
                 }
             }
         };
 
-        var panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-
-        // view.setLayout(new FlowLayout());
-        panel.setBorder(new EmptyBorder(2, 2, 2, 2));
+        if (Main.debug)
+            view.setBorder(new LineBorder(Main.hashColor(view.getClass())));
 
         view.setToolTipText(server.getName());
-        panel.add(view);
 
-        return panel;
+        return view;
     }
 
     // protected JComponent createRoleLabel(String text) {
