@@ -19,6 +19,8 @@ public class DiscordMarkdown {
     
     public static final Pattern emoji = Pattern.compile("&lt;a?:[^\\s]+:([\\d]+)&gt;");
 
+    public static final Pattern br = Pattern.compile("<br\\s*/?>");
+
     enum Formattings {
         bold("**", "b"),
         italic("*", "i"),
@@ -33,8 +35,8 @@ public class DiscordMarkdown {
 
         small("-# ", "small", false, false, true, false),
 
-        quote("> ", "quote", false, false, true, true),
-        triplequote(">>> ", "quote", false, false, true, true),
+        quote("&gt; ", "quote", false, false, true, true),
+        triplequote("&gt;&gt;&gt; ", "quote", false, false, true, true),
         ;
 
         /**
@@ -254,7 +256,9 @@ public class DiscordMarkdown {
     public static String parseEmojis(String str, boolean allow_big_emojis) {
         var is_emoji_only = false;
         if (allow_big_emojis) {
-            emoji.matcher(str).replaceAll("").isBlank();
+            var s = emoji.matcher(str).replaceAll("");
+            s = br.matcher(s).replaceAll("");
+            is_emoji_only = s.isBlank();
         }
 
         return emoji.matcher(str).replaceAll(String.format("<emoji key=\"$1\" %s/>", is_emoji_only ? "size='40' " : ""));
