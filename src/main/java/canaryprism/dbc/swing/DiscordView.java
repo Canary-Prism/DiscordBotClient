@@ -3,31 +3,17 @@ package canaryprism.dbc.swing;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
-import java.nio.channels.Channel;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.server.Server;
 
-import canaryprism.dbc.MediaCache;
 import canaryprism.dbc.swing.server.ServerView;
 import canaryprism.dbc.swing.server.serverlist.ServerListView;
-import canaryprism.dbc.swing.text.TextView;
 
 public class DiscordView extends JComponent {
 
