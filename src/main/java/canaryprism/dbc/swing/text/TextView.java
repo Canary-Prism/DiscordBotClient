@@ -5,6 +5,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -384,7 +385,6 @@ public class TextView extends JComponent {
                                     continue;
                                 }
                                 var image = MediaCache.getImage("attachment", attachment, Attachment::getUrl);
-                                var img = new JLabel();
 
                                 if (image == null) {
                                     System.err.println("Failed to load image: " + url);
@@ -408,10 +408,9 @@ public class TextView extends JComponent {
                                     savePrompt(image, filname);
                                 });
 
-                                img.setIcon(new ImageIcon(image.getScaledInstance((int) (width * scale),
-                                        (int) (height * scale) , Image.SCALE_SMOOTH)));
-                                img.setBounds((int) x, (int) y, (int)(width * scale), (int)(height * scale));
-                                img.addMouseListener(new MouseAdapter() {
+                                var view = new ImageView(image);
+
+                                view.addMouseListener(new MouseAdapter() {
                                     @Override
                                     public void mouseClicked(java.awt.event.MouseEvent e) {
                                         if (context_menu.isShowing())
@@ -421,31 +420,33 @@ public class TextView extends JComponent {
 
                                     public void mousePressed(java.awt.event.MouseEvent e) {
                                         if (e.isPopupTrigger()) {
-                                            context_menu.show(img, e.getX(), e.getY());
+                                            context_menu.show(view, e.getX(), e.getY());
                                             e.consume();
                                         }
                                     }
 
                                     public void mouseReleased(java.awt.event.MouseEvent e) {
                                         if (e.isPopupTrigger()) {
-                                            context_menu.show(img, e.getX(), e.getY());
+                                            context_menu.show(view, e.getX(), e.getY());
                                             e.consume();
                                         }
                                     }
 
                                     @Override
                                     public void mouseEntered(java.awt.event.MouseEvent e) {
-                                        TextView.this.getParent().dispatchEvent(SwingUtilities.convertMouseEvent(img, e, img.getParent()));
+                                        TextView.this.getParent().dispatchEvent(SwingUtilities.convertMouseEvent(view, e, view.getParent()));
                                     }
 
                                     @Override
                                     public void mouseExited(java.awt.event.MouseEvent e) {
-                                        TextView.this.getParent().dispatchEvent(SwingUtilities.convertMouseEvent(img, e, img.getParent()));
+                                        TextView.this.getParent().dispatchEvent(SwingUtilities.convertMouseEvent(view, e, view.getParent()));
                                     }
                                 });
-                                img.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                                view.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+                                view.setBounds((int) x, (int) y, (int)(width * scale), (int)(height * scale));
                                 // future.thenRun(() -> {
-                                    this.add(img);
+                                    this.add(view);
                                 // });
                                 
                                 y += height * scale;
@@ -476,7 +477,6 @@ public class TextView extends JComponent {
                                     continue;
                                 }
                                 var image = MediaCache.getImage("attachment", emoji, (e) -> e.getImage().getUrl());
-                                var label = new JLabel();
 
                                 if (image == null) {
                                     System.err.println("Failed to load emoji: " + emoji);
@@ -492,8 +492,7 @@ public class TextView extends JComponent {
 
                                 var scale = (double)size / image.getHeight(this);
 
-                                label.setIcon(new ImageIcon(image.getScaledInstance((int) (image.getWidth(this) * scale),
-                                        (int) (image.getHeight(this) * scale), Image.SCALE_SMOOTH)));
+                                var view = new ImageView(image);
 
                                 var popup = new JPopupMenu();
                                 var popup_label = new JLabel();
@@ -529,25 +528,25 @@ public class TextView extends JComponent {
                                     savePrompt(image, emoji.getName() + ".webp"); // webp is the only format discord uses for emojis, probably
                                 });
 
-                                label.addMouseListener(new MouseAdapter() {
+                                view.addMouseListener(new MouseAdapter() {
                                     @Override
                                     public void mouseClicked(java.awt.event.MouseEvent e) {
-                                        popup.show(label, e.getX(), e.getY());
+                                        popup.show(view, e.getX(), e.getY());
                                     }
 
                                     @Override
                                     public void mouseEntered(java.awt.event.MouseEvent e) {
                                         TextView.this.getParent().dispatchEvent(
-                                                SwingUtilities.convertMouseEvent(label, e, label.getParent()));
+                                                SwingUtilities.convertMouseEvent(view, e, view.getParent()));
                                     }
 
                                     @Override
                                     public void mouseExited(java.awt.event.MouseEvent e) {
                                         TextView.this.getParent().dispatchEvent(
-                                                SwingUtilities.convertMouseEvent(label, e, label.getParent()));
+                                                SwingUtilities.convertMouseEvent(view, e, view.getParent()));
                                     }
                                 });
-                                label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                                view.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
                                 yinc = image.getHeight(this) * scale;
                                 if (x + image.getWidth(this) * scale > this.getWidth()) {
@@ -555,9 +554,9 @@ public class TextView extends JComponent {
                                     y += image.getHeight(this) * scale;
                                 }
 
-                                label.setBounds((int) x, (int) y, (int)(image.getWidth(this) * scale), (int)(image.getHeight(this) * scale));
+                                view.setBounds((int) x, (int) y, (int)(image.getWidth(this) * scale), (int)(image.getHeight(this) * scale));
 
-                                this.add(label);
+                                this.add(view);
 
                                 x += image.getWidth(this) * scale + 5;
 
@@ -804,6 +803,8 @@ public class TextView extends JComponent {
             this.lines = null;
         }
     }
+
+
 
     @Override
     protected void paintComponent(Graphics g) {
