@@ -94,6 +94,8 @@ public class TextView extends JComponent {
             this.xml = parseXML(String.format("<root>%s</root>", text));
 
             last_width = 0;
+
+            spoilers.clear();
             this.revalidate();
         } catch (ParserConfigurationException | SAXException | IOException e) {
             System.err.println("Failed to parse XML for: " + text);
@@ -158,6 +160,8 @@ public class TextView extends JComponent {
             // label_cache_index = 0;
             strikethrough = underline = false;
 
+            spoiler_index = 0;
+
             if (lines != null)
                 lines.clear();
 
@@ -206,8 +210,11 @@ public class TextView extends JComponent {
 
     private double x, y;
     private double yinc;
-    private boolean strikethrough, underline, small, code, quote, link;
+    private boolean strikethrough, underline, small, code, quote, link, spoiler;
     private String link_url;
+
+    private final ArrayList<Boolean> spoilers = new ArrayList<>();
+    private int spoiler_index = 0;
 
     private final Map<String, URL> media_cache = new HashMap<>();
 
@@ -366,6 +373,17 @@ public class TextView extends JComponent {
 
                             link = false;
                             link_url = null;
+                        }
+
+                        case "spoiler" -> {
+                            if (spoiler_index >= spoilers.size())
+                                spoilers.add(false); // TODO: add the ability to configure spoilers to always be shown
+                            spoiler = true;
+
+                            parse(child);
+
+                            spoiler = false;
+                            spoiler_index++;
                         }
 
                         case "atch" -> {
@@ -815,6 +833,56 @@ public class TextView extends JComponent {
                                 .dispatchEvent(SwingUtilities.convertMouseEvent(label, e, label.getParent()));
                     }
                 });
+            }
+
+            if (spoiler) {
+                var i = this.spoiler_index;
+
+                var spoiler = new JPanel() {
+                    @Override
+                    public void paint(Graphics g) {
+                        if (spoilers.get(i) == isVisible()) {
+                            setVisible(!spoilers.get(i));
+                        }
+                        super.paint(g);
+                    }
+                };
+
+                spoiler.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                spoiler.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(java.awt.event.MouseEvent e) {
+                        spoilers.set(i, true);
+                        TextView.this.repaint();
+                    }
+
+                    @Override
+                    public void mouseEntered(java.awt.event.MouseEvent e) {
+                        TextView.this.getParent()
+                                .dispatchEvent(SwingUtilities.convertMouseEvent(spoiler, e, spoiler.getParent()));
+                    }
+
+                    @Override
+                    public void mouseExited(java.awt.event.MouseEvent e) {
+                        TextView.this.getParent()
+                                .dispatchEvent(SwingUtilities.convertMouseEvent(spoiler, e, spoiler.getParent()));
+                    }
+                });
+
+                spoiler.setBackground(Color.lightGray.darker());
+                spoiler.setOpaque(true);
+                spoiler.setVisible(!spoilers.get(i));
+
+                spoiler.setBounds((int) x,
+                        (int) Math.round(y - metrics.getMaxAscent()
+                                + line_metrics.getBaselineOffsets()[line_metrics.getBaselineIndex()]),
+                        (int) metrics.stringWidth(text),
+                        (int) metrics.getMaxAscent() + metrics.getMaxDescent() + metrics.getLeading());
+
+                if (Main.debug)
+                    spoiler.setBorder(new LineBorder(Main.hashColor(spoiler.getClass()), 1));
+
+                this.add(spoiler);
             }
 
             if (Main.debug)

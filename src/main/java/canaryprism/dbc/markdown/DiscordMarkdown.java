@@ -30,6 +30,8 @@ public class DiscordMarkdown {
         underline("__", "u"),
         emphasis("_", "i", false, true),
 
+        spoiler("||", "spoiler"),
+
         header1("# ", "h1", false, false, true, false),
         header2("## ", "h2", false, false, true, false),
         header3("### ", "h3", false, false, true, false),
