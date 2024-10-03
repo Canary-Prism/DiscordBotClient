@@ -858,14 +858,12 @@ public class TextView extends JComponent {
 
                     @Override
                     public void mouseEntered(java.awt.event.MouseEvent e) {
-                        TextView.this.getParent()
-                                .dispatchEvent(SwingUtilities.convertMouseEvent(spoiler, e, spoiler.getParent()));
+                        TextView.this.dispatchEvent(SwingUtilities.convertMouseEvent(spoiler, e, TextView.this));
                     }
 
                     @Override
                     public void mouseExited(java.awt.event.MouseEvent e) {
-                        TextView.this.getParent()
-                                .dispatchEvent(SwingUtilities.convertMouseEvent(spoiler, e, spoiler.getParent()));
+                        TextView.this.dispatchEvent(SwingUtilities.convertMouseEvent(spoiler, e, TextView.this));
                     }
                 });
 
