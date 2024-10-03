@@ -24,6 +24,10 @@ This program uses Java 21
 
 ## Historical Changelog
 
+### 1.4.0
+- added links and hyperlinks
+- added spoilers
+
 ### 1.3.1
 - added anti-aliasing to referenced message drawing
 
