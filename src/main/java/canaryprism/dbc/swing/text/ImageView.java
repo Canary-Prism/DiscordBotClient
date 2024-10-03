@@ -3,6 +3,9 @@ package canaryprism.dbc.swing.text;
 import java.awt.Image;
 
 import javax.swing.JComponent;
+import javax.swing.border.LineBorder;
+
+import canaryprism.dbc.Main;
 
 /**
  * A component that displays an image. this is like really simple and i only made this because i needed it for the
@@ -15,6 +18,10 @@ public class ImageView extends JComponent {
 
     public ImageView(Image image) {
         this.image = image;
+
+        if (Main.debug) {
+            this.setBorder(new LineBorder(Main.hashColor(ImageView.class)));
+        }
     }
 
     @Override
