@@ -1,5 +1,6 @@
 package canaryprism.dbc.markdown;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import canaryprism.dbc.Main;
@@ -262,5 +263,114 @@ public class DiscordMarkdown {
         }
 
         return emoji.matcher(str).replaceAll(String.format("<emoji key=\"$1\" %s/>", is_emoji_only ? "size='40' " : ""));
+    }
+
+    public static final Pattern link = Pattern.compile("(https?://[^\\s]{2,}?)(?=[^\\w\\s/]*?(?:\\s|$))");
+    public static final Pattern embed_suppressed_link = Pattern.compile("&lt;(https?://[^\\s]+?)&gt;");
+    public static final Pattern hyperlink = Pattern.compile("\\[([^\\[\\]\\(\\)]+?)\\]\\((https?://[^\\s]+?)\\)");
+    public static final Pattern embed_suppressed_hyperlink = Pattern.compile("\\[([^\\[\\]\\(\\)]+?)\\]\\(&lt;(https?://[^\\s]+?)&gt;\\)");
+
+    public static final Pattern[] links = { embed_suppressed_link, link, hyperlink, embed_suppressed_hyperlink };
+
+    public static String parseLinks(String str) {
+        interface Element {
+            String stringify();
+        }
+        record Text(String str) implements Element {
+            @Override
+            public String stringify() {
+                return str;
+            }
+        }
+        record Link(String url, String text) implements Element {
+            @Override
+            public String stringify() {
+                return String.format("<link url=\"%s\">%s</link>", url, text);
+            }
+        }
+
+        var list = new ArrayList<Element>();
+
+        list.add(new Text(str));
+
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i) instanceof Text(var text)) {
+                var split = embed_suppressed_hyperlink.splitWithDelimiters(text, 0);
+                list.remove(i);
+                for (int j = 0; j < split.length; j++) {
+                    if ((j & 1) == 0) {
+                        list.add(i, new Text(split[j]));
+                        i++;
+                    } else {
+                        var m = embed_suppressed_hyperlink.matcher(split[j]);
+                        m.matches();
+                        list.add(i, new Link(m.group(2), m.group(1)));
+                        i++;
+                    }
+                }
+                i--;
+            }
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i) instanceof Text(var text)) {
+                var split = hyperlink.splitWithDelimiters(text, 0);
+                list.remove(i);
+                for (int j = 0; j < split.length; j++) {
+                    if ((j & 1) == 0) {
+                        list.add(i, new Text(split[j]));
+                        i++;
+                    } else {
+                        var m = hyperlink.matcher(split[j]);
+                        m.matches();
+                        list.add(i, new Link(m.group(2), m.group(1)));
+                        i++;
+                    }
+                }
+                i--;
+            }
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i) instanceof Text(var text)) {
+                var split = embed_suppressed_link.splitWithDelimiters(text, 0);
+                list.remove(i);
+                for (int j = 0; j < split.length; j++) {
+                    if ((j & 1) == 0) {
+                        list.add(i, new Text(split[j]));
+                        i++;
+                    } else {
+                        var m = embed_suppressed_link.matcher(split[j]);
+                        m.matches();
+                        list.add(i, new Link(m.group(1), m.group(1)));
+                        i++;
+                    }
+                }
+                i--;
+            }
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i) instanceof Text(var text)) {
+                var split = link.splitWithDelimiters(text, 0);
+                list.remove(i);
+                for (int j = 0; j < split.length; j++) {
+                    if ((j & 1) == 0) {
+                        list.add(i, new Text(split[j]));
+                        i++;
+                    } else {
+                        var m = link.matcher(split[j]);
+                        m.matches();
+                        list.add(i, new Link(m.group(1), m.group(1)));
+                        i++;
+                    }
+                }
+                i--;
+            }
+        }
+
+        if (Main.debug) {
+            System.out.print("Link parse result:");
+            System.out.println(list);
+        }
+
+        return list.stream().map(Element::stringify).reduce("", (a, b) -> a + b);
     }
 }

@@ -14,6 +14,8 @@ import canaryprism.dbc.MediaCache;
 import canaryprism.dbc.markdown.DiscordMarkdown;
 import canaryprism.dbc.swing.text.TextView;
 
+import static canaryprism.dbc.markdown.DiscordMarkdown.*;
+
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -243,7 +245,7 @@ public class MessageView extends JComponent {
         var map = new HashMap<>();
         sb.append(String.format(
             "%s%s", 
-            DiscordMarkdown.parseEmojis(DiscordMarkdown.toXHTML(StringEscapeUtils.escapeXml11((message.getContent())))), 
+            parseEmojis(toXHTML(parseLinks(StringEscapeUtils.escapeXml11((message.getContent()))))), 
             edited ? " <small>(edited)</small>" : ""
         ));
         int i = 0;

@@ -2,6 +2,7 @@ package canaryprism.dbc.swing.text;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -9,6 +10,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ComponentAdapter;
@@ -204,7 +206,8 @@ public class TextView extends JComponent {
 
     private double x, y;
     private double yinc;
-    private boolean strikethrough, underline, small, code, quote;
+    private boolean strikethrough, underline, small, code, quote, link;
+    private String link_url;
 
     private final Map<String, URL> media_cache = new HashMap<>();
 
@@ -353,6 +356,16 @@ public class TextView extends JComponent {
                             this.quote = true;
                             parse(child);
                             this.quote = false;
+                        }
+
+                        case "link" -> {
+                            link = true;
+                            link_url = child.getAttributes().getNamedItem("url").getTextContent();
+
+                            parse(child);
+
+                            link = false;
+                            link_url = null;
                         }
 
                         case "atch" -> {
@@ -677,6 +690,11 @@ public class TextView extends JComponent {
     
             sb.append(space.matcher(StringEscapeUtils.escapeHtml3(text)).replaceAll("&nbsp;"));
 
+            if (link) {
+                sb.insert(0, String.format("<a href='%s'>", link_url)).append("</a>");
+
+            }
+
             if (strikethrough) {
                 sb.insert(0, "<s>").append("</s>");
             }
@@ -725,6 +743,78 @@ public class TextView extends JComponent {
             if (code) {
                 label.setBackground(this.getBackground().darker());
                 label.setOpaque(true);
+            }
+
+            if (link) {
+                label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                label.setToolTipText(link_url);
+
+                final var link_url = this.link_url;
+
+                var context_menu = new JPopupMenu();
+
+                var popup_label = context_menu.add("Copy Link");
+                popup_label.addActionListener((e) -> {
+                    var transferrable = new StringSelection(link_url);
+                    this.getToolkit().getSystemClipboard().setContents(transferrable, transferrable);
+                });
+
+                label.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(java.awt.event.MouseEvent e) {
+                        if (context_menu.isShowing())
+                            return;
+                        
+                        var result = JOptionPane.showConfirmDialog(
+                            TextView.this, 
+                            String.format("""
+                                <html>
+                                    <p><b>Open Link:</b></p>
+                                    <p>%s</p>
+                                </html>
+                                """, 
+                                link_url), 
+                            "Open Link", 
+                            JOptionPane.YES_NO_OPTION
+                        );
+
+                        if (result != JOptionPane.YES_OPTION)
+                            return;
+                        
+                        try {
+                            Desktop.getDesktop().browse(new URI(link_url));
+                        } catch (IOException | URISyntaxException ex) {
+                            JOptionPane.showMessageDialog(TextView.this, "Failed to open link: " + link_url, "Error", JOptionPane.ERROR_MESSAGE);
+                            ex.printStackTrace();
+                        }
+                    }
+
+                    public void mousePressed(java.awt.event.MouseEvent e) {
+                        if (e.isPopupTrigger()) {
+                            context_menu.show(label, e.getX(), e.getY());
+                            e.consume();
+                        }
+                    }
+
+                    public void mouseReleased(java.awt.event.MouseEvent e) {
+                        if (e.isPopupTrigger()) {
+                            context_menu.show(label, e.getX(), e.getY());
+                            e.consume();
+                        }
+                    }
+
+                    @Override
+                    public void mouseEntered(java.awt.event.MouseEvent e) {
+                        TextView.this.getParent()
+                                .dispatchEvent(SwingUtilities.convertMouseEvent(label, e, label.getParent()));
+                    }
+
+                    @Override
+                    public void mouseExited(java.awt.event.MouseEvent e) {
+                        TextView.this.getParent()
+                                .dispatchEvent(SwingUtilities.convertMouseEvent(label, e, label.getParent()));
+                    }
+                });
             }
 
             if (Main.debug)
