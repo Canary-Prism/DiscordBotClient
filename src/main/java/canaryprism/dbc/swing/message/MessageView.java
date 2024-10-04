@@ -291,6 +291,8 @@ public class MessageView extends JComponent {
     }
 
     private void collapse() {
+        if (is_reply)
+            return;
         shows_author = false;
         updateCreationLabel();
         this.revalidate();
