@@ -11,8 +11,9 @@ import org.json.JSONTokener;
 import canaryprism.dbc.save.SaveSystem;
 
 public class JSONSaveSystem {
-    public static Optional<JSONData> get(Path path) {
-        return SaveSystem.get(path, (is) -> {
+    @SuppressWarnings("unchecked")
+    public static Optional<JSONData<?>> get(Path path) {
+        return (Optional<JSONData<?>>) /* what the fuck */ (Object) SaveSystem.get(path, (is) -> {
             try {
                 return new JSONObjectData(new JSONObject(new JSONTokener(is)));
             } catch (JSONException e) {
