@@ -316,6 +316,12 @@ public class MessageView extends JComponent {
         var x = pfp + 10 + 5;
         var y = 3;
 
+        if (is_reply) {
+            reply_view.setSize(width, reply_view.getPreferredSize().height);
+            y += reply_view.getPreferredSize().height + reply_view.getY();
+        }
+        var pfp_y = y;
+
         creation_label.setFont(getFont().deriveFont(10f));
         if (!shows_author) {
             // this is stupid but it works
@@ -327,10 +333,6 @@ public class MessageView extends JComponent {
             y += 20;
         }
 
-        if (is_reply) {
-            reply_view.setSize(width, reply_view.getPreferredSize().height);
-            y += reply_view.getPreferredSize().height + reply_view.getY();
-        }
 
 
         if (!is_editing) {
@@ -374,7 +376,7 @@ public class MessageView extends JComponent {
 
 
         if (shows_author) {
-            preferred_size.height = Math.max(mewo, pfp);
+            preferred_size.height = Math.max(mewo, pfp + pfp_y);
         } else {
             preferred_size.height = mewo;
         }
