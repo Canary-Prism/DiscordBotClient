@@ -11,12 +11,20 @@ import org.json.JSONObject;
 
 import canaryprism.dbc.save.Data;
 
-public sealed interface JSONData extends Data permits JSONObjectData, JSONArrayData {
+public sealed interface JSONData<T> extends Data permits JSONObjectData, JSONArrayData {
 
-    Optional<JSONObject> getObject();
-    Optional<JSONArray> getArray();
+    default Optional<JSONObject> getObject() {
+        return getAs(JSONObject.class);
+    }
+    default Optional<JSONArray> getArray() {
+        return getAs(JSONArray.class);
+    }
 
-    Object get();
+    default <U> Optional<U> getAs(Class<U> type) {
+        return type.isInstance(get()) ? Optional.of(type.cast(get())) : Optional.empty();
+    }
+
+    T get();
 
     @Override
     default InputStream streamData() {
