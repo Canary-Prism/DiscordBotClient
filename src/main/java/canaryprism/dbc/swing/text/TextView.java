@@ -367,7 +367,7 @@ public class TextView extends JComponent {
 
                         case "link" -> {
                             link = true;
-                            link_url = StringEscapeUtils.unescapeXml(child.getAttributes().getNamedItem("url").getTextContent());
+                            link_url = StringEscapeUtils.unescapeXml(child.getAttributes().getNamedItem("escaped_url").getTextContent());
 
                             parse(child);
 
