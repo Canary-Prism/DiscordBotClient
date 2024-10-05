@@ -54,6 +54,9 @@ import org.xml.sax.SAXException;
 
 import canaryprism.dbc.Main;
 import canaryprism.dbc.MediaCache;
+import canaryprism.dbc.swing.text.attachment.AttachmentView;
+import canaryprism.dbc.swing.text.attachment.FileAttachmentView;
+import canaryprism.dbc.swing.text.attachment.ImageAttachmentView;
 
 public class TextView extends JComponent {
 
@@ -367,7 +370,7 @@ public class TextView extends JComponent {
 
                         case "link" -> {
                             link = true;
-                            link_url = StringEscapeUtils.unescapeXml(child.getAttributes().getNamedItem("escaped_url").getTextContent());
+                            link_url = StringEscapeUtils.unescapeXml(child.getAttributes().getNamedItem("url").getTextContent());
 
                             parse(child);
 
@@ -400,87 +403,18 @@ public class TextView extends JComponent {
                                     x = carriageReturn();
                                     y += yinc;
                                 }
-                                var url = attachment.getUrl();
 
-                                var filname = attachment.getFileName();
+                                var view = createAttachmentView(attachment);
 
-                                if (!MediaCache.has("attachment", attachment, Attachment::getUrl)) {
-                                    Thread.ofVirtual().start(() -> {
-                                        MediaCache.getImage("attachment", attachment, Attachment::getUrl);
-                                        
-                                        SwingUtilities.invokeLater(() -> {
-                                            last_width = 0;
-                                            this.revalidate();
-                                        });
-                                    });
-                                    continue;
-                                }
-                                var image = MediaCache.getImage("attachment", attachment, Attachment::getUrl);
-
-                                if (image == null) {
-                                    System.err.println("Failed to load image: " + url);
+                                if (view == null) {
                                     continue;
                                 }
 
-                                var width = image.getWidth(this);
-                                var height = image.getHeight(this);
-                                // System.out.println("height: " + height);
-                                var scale = Math.min((double)width, this.getWidth()) / width;
+                                y += view.getHeight();
 
-                                var context_menu = new JPopupMenu();
+                                yinc = 0;
 
-                                var popup_label = context_menu.add("Copy Image");
-                                popup_label.addActionListener((e) -> {
-                                    copyToClipboard(image);
-                                });
-
-                                var save_item = context_menu.add("Save Image");
-                                save_item.addActionListener((e) -> {
-                                    savePrompt(image, filname);
-                                });
-
-                                var view = new ImageView(image);
-
-                                view.addMouseListener(new MouseAdapter() {
-                                    @Override
-                                    public void mouseClicked(java.awt.event.MouseEvent e) {
-                                        if (context_menu.isShowing())
-                                            return;
-                                        JOptionPane.showMessageDialog(null, new ImageIcon(image), filname, JOptionPane.PLAIN_MESSAGE);
-                                    }
-
-                                    public void mousePressed(java.awt.event.MouseEvent e) {
-                                        if (e.isPopupTrigger()) {
-                                            context_menu.show(view, e.getX(), e.getY());
-                                            e.consume();
-                                        }
-                                    }
-
-                                    public void mouseReleased(java.awt.event.MouseEvent e) {
-                                        if (e.isPopupTrigger()) {
-                                            context_menu.show(view, e.getX(), e.getY());
-                                            e.consume();
-                                        }
-                                    }
-
-                                    @Override
-                                    public void mouseEntered(java.awt.event.MouseEvent e) {
-                                        TextView.this.getParent().dispatchEvent(SwingUtilities.convertMouseEvent(view, e, view.getParent()));
-                                    }
-
-                                    @Override
-                                    public void mouseExited(java.awt.event.MouseEvent e) {
-                                        TextView.this.getParent().dispatchEvent(SwingUtilities.convertMouseEvent(view, e, view.getParent()));
-                                    }
-                                });
-                                view.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-                                view.setBounds((int) x, (int) y, (int)(width * scale), (int)(height * scale));
-                                // future.thenRun(() -> {
-                                    this.add(view);
-                                // });
-                                
-                                y += height * scale;
+                                this.add(view);
                             } catch (DOMException e) {
                                 System.err.print("Failed to load image: ");
                                 e.printStackTrace();
@@ -896,6 +830,93 @@ public class TextView extends JComponent {
             // }
             // System.out.println("added label");
         // });
+    }
+
+    private AttachmentView createAttachmentView(Attachment attachment) {
+        var filename = attachment.getFileName();
+        var extension = filename.substring(switch (filename.lastIndexOf('.')) {
+            case -1 -> filename.length();
+            default -> filename.lastIndexOf('.');
+        });
+
+        var v = switch (extension) {
+            case ".png", ".jpg", ".jpeg", ".gif", ".webp" -> {
+                var url = attachment.getUrl();
+
+                if (!MediaCache.has("attachment", attachment, Attachment::getUrl)) {
+                    Thread.ofVirtual().start(() -> {
+                        MediaCache.getImage("attachment", attachment, Attachment::getUrl);
+
+                        SwingUtilities.invokeLater(() -> {
+                            last_width = 0;
+                            this.revalidate();
+                        });
+                    });
+                    
+                    yield null;
+                }
+                var image = MediaCache.getImage("attachment", attachment, Attachment::getUrl);
+
+                if (image == null) {
+                    System.err.println("Failed to load image: " + url);
+                    yield null;
+                }
+
+                var view = new ImageAttachmentView(filename, image);
+
+                var width = image.getWidth(this);
+                var height = image.getHeight(this);
+                // System.out.println("height: " + height);
+                var scale = Math.min((double) width, this.getWidth()) / width;
+
+                view.setBounds((int) x, (int) y, (int) (width * scale), (int) (height * scale));
+
+                view.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+                view.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(java.awt.event.MouseEvent e) {
+                        if (view.getComponentPopupMenu().isShowing())
+                            return;
+                        JOptionPane.showMessageDialog(null, new ImageIcon(image), filename, JOptionPane.PLAIN_MESSAGE);
+                    }
+                });
+
+                yield view;
+            }
+
+            default -> {
+
+                var view = new FileAttachmentView(filename, attachment.getUrl());
+                this.add(view);
+                view.setBounds((int) x, (int) y, (int)Math.min(500, this.getWidth() - x), 0);
+                view.doLayout();
+                this.remove(view);
+                view.setSize(view.getPreferredSize());
+
+                yield view;
+            }
+        };
+
+        if (v == null)
+            return null;
+
+        v.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                TextView.this.getParent()
+                        .dispatchEvent(SwingUtilities.convertMouseEvent(v, e, v.getParent()));
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                TextView.this.getParent()
+                        .dispatchEvent(SwingUtilities.convertMouseEvent(v, e, v.getParent()));
+            }
+        });
+
+        return v;
     }
 
     public static void copyToClipboard(Image image) {

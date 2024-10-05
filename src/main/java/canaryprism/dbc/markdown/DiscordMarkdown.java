@@ -289,7 +289,7 @@ public class DiscordMarkdown {
         record Link(String url, String text) implements Element {
             @Override
             public String stringify() {
-                return String.format("<link escaped_url=\"%s\">%s</link>", StringEscapeUtils.escapeXml11(url), text);
+                return String.format("<link url=\"%s\">%s</link>", StringEscapeUtils.escapeXml11(url), text);
             }
         }
 
