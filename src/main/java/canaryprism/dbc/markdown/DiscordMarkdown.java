@@ -3,6 +3,8 @@ package canaryprism.dbc.markdown;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import canaryprism.dbc.Main;
 
 public class DiscordMarkdown {
@@ -287,7 +289,7 @@ public class DiscordMarkdown {
         record Link(String url, String text) implements Element {
             @Override
             public String stringify() {
-                return String.format("<link url=\"%s\">%s</link>", url, text);
+                return String.format("<link escaped_url=\"%s\">%s</link>", StringEscapeUtils.escapeXml11(url), text);
             }
         }
 
