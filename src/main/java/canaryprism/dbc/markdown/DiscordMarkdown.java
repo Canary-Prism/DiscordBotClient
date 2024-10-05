@@ -298,12 +298,13 @@ public class DiscordMarkdown {
         list.add(new Text(str));
 
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i) instanceof Text(var text)) {
+            if (list.get(i) instanceof Text(var t)) {
+                var text = StringEscapeUtils.unescapeXml(t);
                 var split = embed_suppressed_hyperlink.splitWithDelimiters(text, 0);
                 list.remove(i);
                 for (int j = 0; j < split.length; j++) {
                     if ((j & 1) == 0) {
-                        list.add(i, new Text(split[j]));
+                        list.add(i, new Text(StringEscapeUtils.escapeXml11(split[j])));
                         i++;
                     } else {
                         var m = embed_suppressed_hyperlink.matcher(split[j]);
@@ -316,12 +317,13 @@ public class DiscordMarkdown {
             }
         }
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i) instanceof Text(var text)) {
+            if (list.get(i) instanceof Text(var t)) {
+                var text = StringEscapeUtils.unescapeXml(t);
                 var split = hyperlink.splitWithDelimiters(text, 0);
                 list.remove(i);
                 for (int j = 0; j < split.length; j++) {
                     if ((j & 1) == 0) {
-                        list.add(i, new Text(split[j]));
+                        list.add(i, new Text(StringEscapeUtils.escapeXml11(split[j])));
                         i++;
                     } else {
                         var m = hyperlink.matcher(split[j]);
@@ -334,12 +336,13 @@ public class DiscordMarkdown {
             }
         }
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i) instanceof Text(var text)) {
+            if (list.get(i) instanceof Text(var t)) {
+                var text = StringEscapeUtils.unescapeXml(t);
                 var split = embed_suppressed_link.splitWithDelimiters(text, 0);
                 list.remove(i);
                 for (int j = 0; j < split.length; j++) {
                     if ((j & 1) == 0) {
-                        list.add(i, new Text(split[j]));
+                        list.add(i, new Text(StringEscapeUtils.escapeXml11(split[j])));
                         i++;
                     } else {
                         var m = embed_suppressed_link.matcher(split[j]);
@@ -352,12 +355,13 @@ public class DiscordMarkdown {
             }
         }
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i) instanceof Text(var text)) {
+            if (list.get(i) instanceof Text(var t)) {
+                var text = StringEscapeUtils.unescapeXml(t);
                 var split = link.splitWithDelimiters(text, 0);
                 list.remove(i);
                 for (int j = 0; j < split.length; j++) {
                     if ((j & 1) == 0) {
-                        list.add(i, new Text(split[j]));
+                        list.add(i, new Text(StringEscapeUtils.escapeXml11(split[j])));
                         i++;
                     } else {
                         var m = link.matcher(split[j]);
