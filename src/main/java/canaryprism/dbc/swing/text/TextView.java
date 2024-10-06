@@ -513,13 +513,19 @@ public class TextView extends JComponent {
                                 });
                                 view.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-                                yinc = image.getHeight(this) * scale;
-                                if (x + image.getWidth(this) * scale > this.getWidth()) {
-                                    x = carriageReturn();
-                                    y += image.getHeight(this) * scale;
-                                }
+                                var w = image.getWidth(this) * scale;
+                                var h = image.getHeight(this) * scale;
 
-                                view.setBounds((int) x, (int) y, (int)(image.getWidth(this) * scale), (int)(image.getHeight(this) * scale));
+                                if (x + w > this.getWidth()) {
+                                    x = carriageReturn();
+                                    y += h;
+                                    yinc = 0;
+                                }
+                                yinc = Math.max(yinc, 0);
+
+                                var metrics = this.getFontMetrics(this.getFont());
+                                
+                                view.setBounds((int) x, (int) (y - metrics.getAscent()), (int)(w), (int)(h));
 
                                 this.add(view);
 
@@ -889,7 +895,7 @@ public class TextView extends JComponent {
 
                 var view = new FileAttachmentView(filename, attachment.getUrl());
                 this.add(view);
-                view.setBounds((int) x, (int) y, (int)Math.min(500, this.getWidth() - x), 0);
+                view.setBounds((int) x, (int) y, (int)Math.min(300, this.getWidth() - x), 0);
                 view.doLayout();
                 this.remove(view);
                 view.setSize(view.getPreferredSize());
