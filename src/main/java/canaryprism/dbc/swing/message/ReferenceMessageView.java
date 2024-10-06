@@ -1,5 +1,7 @@
 package canaryprism.dbc.swing.message;
 
+import static canaryprism.dbc.markdown.DiscordMarkdown.*;
+
 import java.awt.AlphaComposite;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -60,7 +62,7 @@ public class ReferenceMessageView extends JComponent {
         var map = new HashMap<>();
         sb.append(String.format(
             "%s%s", 
-            DiscordMarkdown.parseEmojis(DiscordMarkdown.toXHTML(StringEscapeUtils.escapeXml11((message.getContent()))), false), 
+            parseEmojis(toXHTML(parseLinks(StringEscapeUtils.escapeXml11((message.getContent())))), false), 
             edited ? " <small>(edited)</small>" : ""
         ));
 
