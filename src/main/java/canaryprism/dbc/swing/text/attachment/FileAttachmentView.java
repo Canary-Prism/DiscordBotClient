@@ -50,7 +50,7 @@ public class FileAttachmentView extends AttachmentView {
         var y = 5;
         var wp = 5;
         var hp = 5;
-        this.text_view.setBounds(x, y, this.getWidth() - wp, this.getHeight() - hp);
+        this.text_view.setBounds(x, y, this.getWidth() - wp - x, this.getHeight() - hp - y);
         text_view.doLayout();
 
         var size = text_view.getPreferredSize();
