@@ -75,6 +75,14 @@ public class Main {
                 System.setProperty("apple.awt.application.appearance", "system");
                 return FlatMacDarkLaf.class.getName();
             });
+
+            var decorated = getArg(args, "--laf-decorated", (e) -> switch (e) {
+                case "true" -> true;
+                case "false" -> false;
+                default -> throw new IllegalArgumentException(e + " is not a valid boolean for --laf-decorated");
+            }, () -> true);
+
+            JFrame.setDefaultLookAndFeelDecorated(decorated);
         
             try {
                 UIManager.setLookAndFeel(laf);
