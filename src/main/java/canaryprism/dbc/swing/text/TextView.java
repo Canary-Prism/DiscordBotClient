@@ -891,34 +891,34 @@ public class TextView extends JComponent {
                 yield view;
             }
 
-            default -> {
-
-                var view = new FileAttachmentView(filename, attachment.getUrl());
-                this.add(view);
-                view.setBounds((int) x, (int) y, (int)Math.min(300, this.getWidth() - x), 0);
-                view.doLayout();
-                this.remove(view);
-                view.setSize(view.getPreferredSize());
-
-                yield view;
-            }
+            default -> (FileAttachmentView) null; // null but in a FileAttachmentView way :3
         };
 
-        if (v == null)
-            return null;
+        if (v == null) {
+            var view = new FileAttachmentView(filename, attachment.getUrl());
+            this.add(view);
+            view.setBounds((int) x, (int) y, (int) Math.min(300, this.getWidth() - x), 0);
+            view.doLayout();
+            this.remove(view);
+            view.setSize(view.getPreferredSize());
+
+            v = view;
+        }
+
+        final var v2 = v;
 
         v.addMouseListener(new MouseAdapter() {
 
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 TextView.this.getParent()
-                        .dispatchEvent(SwingUtilities.convertMouseEvent(v, e, v.getParent()));
+                        .dispatchEvent(SwingUtilities.convertMouseEvent(v2, e, v2.getParent()));
             }
 
             @Override
             public void mouseExited(java.awt.event.MouseEvent e) {
                 TextView.this.getParent()
-                        .dispatchEvent(SwingUtilities.convertMouseEvent(v, e, v.getParent()));
+                        .dispatchEvent(SwingUtilities.convertMouseEvent(v2, e, v2.getParent()));
             }
         });
 
