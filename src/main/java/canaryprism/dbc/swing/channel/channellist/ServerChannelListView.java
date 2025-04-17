@@ -81,7 +81,7 @@ public class ServerChannelListView extends JComponent {
 
         var panel = new JPanel(new BorderLayout());
 
-        if (Main.debug)
+        if (Main.DEBUG)
             view.setBorder(new LineBorder(Main.hashColor(view.getClass())));
 
         panel.setBorder(new EmptyBorder(2, 2, 2, 2));

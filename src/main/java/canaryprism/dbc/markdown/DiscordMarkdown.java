@@ -97,7 +97,7 @@ public class DiscordMarkdown {
 
             var result = parseMarkdownToXHTML(chars, 0, null);
             
-            if (Main.debug)
+            if (Main.DEBUG)
                 System.out.println("Markdown Parse Result: " + result.stringBuilder.toString());
 
             return result.stringBuilder.toString();
@@ -374,7 +374,7 @@ public class DiscordMarkdown {
             }
         }
 
-        if (Main.debug) {
+        if (Main.DEBUG) {
             System.out.print("Link parse result:");
             System.out.println(list);
         }

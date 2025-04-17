@@ -101,7 +101,7 @@ public class ReferenceMessageView extends JComponent {
 
         // g.scale(scale, scale);
 
-        {
+        if (image != null) {
             var g2 = (Graphics2D) g.create();
 
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

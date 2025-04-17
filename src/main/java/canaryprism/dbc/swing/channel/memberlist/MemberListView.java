@@ -6,7 +6,6 @@ import java.awt.event.ComponentAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -96,7 +95,7 @@ public class MemberListView extends JComponent {
             });
         }
 
-        if (Main.debug)
+        if (Main.DEBUG)
             this.setBorder(new LineBorder(Main.hashColor(MemberListView.class), 1));
     }
 
@@ -185,7 +184,7 @@ public class MemberListView extends JComponent {
         var panel = new JPanel(new BorderLayout());
         // panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
-        if (Main.debug)
+        if (Main.DEBUG)
             view.setBorder(new LineBorder(Main.hashColor(view.getClass()), 1));
 
         panel.setBorder(new EmptyBorder(3, 5, 3, 5));

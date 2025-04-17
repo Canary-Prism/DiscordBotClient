@@ -16,7 +16,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import org.javacord.api.DiscordApi;
@@ -170,7 +169,7 @@ public class ServerListView extends JComponent {
             }
         };
 
-        if (Main.debug)
+        if (Main.DEBUG)
             view.setBorder(new LineBorder(Main.hashColor(view.getClass())));
 
         view.setToolTipText(server.getName());

@@ -1,23 +1,22 @@
 package canaryprism.dbc.swing.channel;
 
 import java.awt.BorderLayout;
+import java.util.Optional;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.javacord.api.entity.channel.RegularServerChannel;
-import org.javacord.api.entity.channel.ServerTextChannel;
-import org.javacord.api.entity.channel.TextableRegularServerChannel;
+import org.javacord.api.entity.UpdatableFromCache;
+import org.javacord.api.entity.channel.*;
 
 import canaryprism.dbc.swing.channel.memberlist.MemberListView;
 
 public class ServerTextableChannelView extends JComponent {
-    public <T extends TextableRegularServerChannel & RegularServerChannel> ServerTextableChannelView(T channel) {
+    public <T extends RegularServerChannel> ServerTextableChannelView(T channel) {
         this.setLayout(new BorderLayout());
-
         var content_panel = new JPanel(new BorderLayout());
 
-        var message_list_view = new InteractableMessageListView(channel);
+        var message_list_view = new InteractableMessageListView(((TextChannel) channel));
 
         content_panel.add(message_list_view, BorderLayout.CENTER);
 

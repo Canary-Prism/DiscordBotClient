@@ -26,7 +26,6 @@ import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
 import canaryprism.dbc.save.SaveSystem;
 import canaryprism.dbc.swing.DiscordView;
-import canaryprism.dbc.swing.message.MessageView;
 import dev.dirs.ProjectDirectories;
 
 public class Main {
@@ -34,12 +33,12 @@ public class Main {
         ImageIO.scanForPlugins();
     }
 
-    public static final boolean debug;
+    public static final boolean DEBUG;
     public static Color hashColor(Class<?> type) {
         return new Color(type.getName().hashCode());
     }
     static {
-        debug = (System.getProperty("canaryprism.dbc.debug") != null);
+        DEBUG = (System.getProperty("canaryprism.dbc.debug") != null);
     }
 
     // static void printNode(Node node) {
@@ -181,7 +180,7 @@ public class Main {
 
         api.addLostConnectionListener((e) -> {
             SwingUtilities.invokeLater(() -> {
-                frame_size = frame.getSize();
+                // frame_size = frame.getSize();
                 frame.setContentPane(lost_connection_panel);
 
                 frame.revalidate();
@@ -200,18 +199,24 @@ public class Main {
 
         api.addReconnectListener((e) -> {
             SwingUtilities.invokeLater(() -> {
-                var view = (DiscordView) main_panel.getComponent(0);
+                var new_view = new DiscordView(api);
+                try {
+                    var old_view = (DiscordView) main_panel.getComponent(0);
+
+                    var selected_server = old_view.getSelectedServer();
+                    var selected_channel = old_view.getSelectedServerView().getSelectedChannel();
+
+                    new_view.showServer(selected_server);
+                    new_view.getSelectedServerView().showChannel(selected_channel);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
 
                 main_panel.removeAll();
                 
-                var selected_server = view.getSelectedServer();
-                var selected_channel = view.getSelectedServerView().getSelectedChannel();
                 
-                var new_view = new DiscordView(api);
                 main_panel.add(new_view, BorderLayout.CENTER);
 
-                new_view.showServer(selected_server);
-                new_view.getSelectedServerView().showChannel(selected_channel);
 
 
                 frame.setContentPane(main_panel);

@@ -6,7 +6,6 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -79,7 +78,7 @@ public class TextView extends JComponent {
             }
         });
 
-        if (Main.debug)
+        if (Main.DEBUG)
             this.setBorder(new LineBorder(Main.hashColor(TextView.class), 1));
     }
 
@@ -516,16 +515,21 @@ public class TextView extends JComponent {
                                 var w = image.getWidth(this) * scale;
                                 var h = image.getHeight(this) * scale;
 
+                                var metrics = this.getFontMetrics(this.getFont());
+                                if (y == 0) {
+                                    view.setBounds((int) x, (int) (y), (int)(w), (int)(h));
+                                } else {
+                                    view.setBounds((int) x, (int) (y - metrics.getAscent()), (int)(w), (int)(h));
+                                }
+
                                 if (x + w > this.getWidth()) {
                                     x = carriageReturn();
-                                    y += h;
+                                    y += size;
                                     yinc = 0;
                                 }
-                                yinc = Math.max(yinc, 0);
+                                yinc = Math.max(yinc, size);
 
-                                var metrics = this.getFontMetrics(this.getFont());
                                 
-                                view.setBounds((int) x, (int) (y - metrics.getAscent()), (int)(w), (int)(h));
 
                                 this.add(view);
 
@@ -684,7 +688,7 @@ public class TextView extends JComponent {
                 quote.setOpaque(true);
                 quote.setBounds(0, (int) Math.round(y + line_metrics.getBaselineOffsets()[line_metrics.getBaselineIndex()] - metrics.getAscent()), 3, (int) line_metrics.getHeight());
 
-                if (Main.debug)
+                if (Main.DEBUG)
                     quote.setBorder(new LineBorder(Main.hashColor(quote.getClass()), 1));
 
                 this.add(quote);
@@ -817,13 +821,13 @@ public class TextView extends JComponent {
                         (int) metrics.stringWidth(text),
                         (int) metrics.getMaxAscent() + metrics.getMaxDescent() + metrics.getLeading());
 
-                if (Main.debug)
+                if (Main.DEBUG)
                     spoiler.setBorder(new LineBorder(Main.hashColor(spoiler.getClass()), 1));
 
                 this.add(spoiler);
             }
 
-            if (Main.debug)
+            if (Main.DEBUG)
                 label.setBorder(new LineBorder(Main.hashColor(label.getClass()), 1));
 
             // future.thenRun(() -> {
@@ -884,7 +888,22 @@ public class TextView extends JComponent {
                     public void mouseClicked(java.awt.event.MouseEvent e) {
                         if (view.getComponentPopupMenu().isShowing())
                             return;
-                        JOptionPane.showMessageDialog(null, new ImageIcon(image), filename, JOptionPane.PLAIN_MESSAGE);
+
+                        var res = getToolkit().getScreenResolution();
+                        var screen = getToolkit().getScreenSize();
+                        var w = width * 72f / res;
+                        var h = height * 72f / res;
+
+                        var scale = Math.min(Math.min(w, screen.width - 200) / width, Math.min(h, screen.height - 200) / height);
+
+                        var popup_view = new ImageView(image);
+                        popup_view.setPreferredSize(new Dimension(
+                            Math.round(width * scale), 
+                            Math.round(height * scale)
+                        ));
+                        var panel = new JPanel();
+                        panel.add(popup_view);
+                        JOptionPane.showMessageDialog(null, panel, filename, JOptionPane.PLAIN_MESSAGE);
                     }
                 });
 
@@ -980,7 +999,7 @@ public class TextView extends JComponent {
     
     private final ArrayList<Integer> lines;
     {
-        if (Main.debug) {
+        if (Main.DEBUG) {
             this.lines = new ArrayList<>();
         } else {
             this.lines = null;

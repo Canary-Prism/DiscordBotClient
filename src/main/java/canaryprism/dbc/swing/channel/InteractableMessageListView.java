@@ -83,7 +83,7 @@ public class InteractableMessageListView extends JComponent {
                         normal_background = InteractableMessageListView.this.getBackground();
                         if (hover || select) {
                             // normal_background = InteractableMessageListView.this.getBackground();
-                            view.setBackground(normal_background.brighter());
+                            view.setBackground(normal_background.darker());
                         } else {
                             view.setBackground(normal_background);
                         }

@@ -11,7 +11,6 @@ import org.javacord.api.entity.message.Message;
 
 import canaryprism.dbc.Main;
 import canaryprism.dbc.MediaCache;
-import canaryprism.dbc.markdown.DiscordMarkdown;
 import canaryprism.dbc.swing.text.TextView;
 
 import static canaryprism.dbc.markdown.DiscordMarkdown.*;
@@ -26,7 +25,6 @@ import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.time.ZoneId;
@@ -217,7 +215,7 @@ public class MessageView extends JComponent {
         this.add(edit_panel);
 
 
-        if (Main.debug) {
+        if (Main.DEBUG) {
             this.setBorder(new javax.swing.border.LineBorder(Main.hashColor(MessageView.class), 1));
         }
     }

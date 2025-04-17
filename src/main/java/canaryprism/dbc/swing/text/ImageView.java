@@ -19,7 +19,7 @@ public class ImageView extends JComponent {
     public ImageView(Image image) {
         this.image = image;
 
-        if (Main.debug) {
+        if (Main.DEBUG) {
             this.setBorder(new LineBorder(Main.hashColor(ImageView.class)));
         }
     }
