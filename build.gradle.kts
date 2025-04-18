@@ -28,7 +28,6 @@ dependencies {
     implementation(libs.org.apache.commons.commons.text)
     implementation(libs.org.json.json)
     implementation(libs.dev.dirs.directories)
-    implementation(libs.com.github.vincentrussell.java.ini.parser)
     implementation(libs.org.javacord.javacord)
     implementation(libs.com.twelvemonkeys.imageio.imageio.webp)
 

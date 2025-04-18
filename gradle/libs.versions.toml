@@ -3,7 +3,6 @@
 
 [versions]
 com-formdev-flatlaf = "3.3"
-com-github-vincentrussell-java-ini-parser = "1.6"
 com-twelvemonkeys-imageio-imageio-webp = "3.10.1"
 dev-dirs-directories = "26"
 org-apache-commons-commons-text = "1.12.0"
@@ -13,7 +12,6 @@ org-junit-jupiter-junit-jupiter-api = "5.11.0"
 
 [libraries]
 com-formdev-flatlaf = { module = "com.formdev:flatlaf", version.ref = "com-formdev-flatlaf" }
-com-github-vincentrussell-java-ini-parser = { module = "com.github.vincentrussell:java-ini-parser", version.ref = "com-github-vincentrussell-java-ini-parser" }
 com-twelvemonkeys-imageio-imageio-webp = { module = "com.twelvemonkeys.imageio:imageio-webp", version.ref = "com-twelvemonkeys-imageio-imageio-webp" }
 dev-dirs-directories = { module = "dev.dirs:directories", version.ref = "dev-dirs-directories" }
 org-apache-commons-commons-text = { module = "org.apache.commons:commons-text", version.ref = "org-apache-commons-commons-text" }
