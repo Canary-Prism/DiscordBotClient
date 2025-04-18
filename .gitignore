@@ -1,5 +1,7 @@
 .DS_Store
 /.vscode
 /target
-
+.gradle
+build
+.idea
 dependency-reduced-pom.xml
