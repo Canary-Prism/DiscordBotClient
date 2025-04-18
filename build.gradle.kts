@@ -15,7 +15,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(22)
 
 application {
     mainClass = "canaryprism.dbc.Main"
-    mainModule = "canaryprism.dbc"
+//    mainModule = "canaryprism.dbc"
 }
 
 
@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.directories)
     implementation(libs.javacord)
     implementation(libs.imageio.webp)
+    implementation(libs.caffeine)
 
     testImplementation(libs.jupiter)
 }
