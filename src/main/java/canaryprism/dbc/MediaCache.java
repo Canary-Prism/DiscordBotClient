@@ -1,30 +1,49 @@
 package canaryprism.dbc;
 
-import java.awt.Image;
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import javax.imageio.ImageIO;
-
 public class MediaCache {
 
+    private static final AsyncLoadingCache<URI, byte[]> cache = Caffeine.newBuilder()
+            .expireAfterAccess(Duration.ofMinutes(5))
+            .buildAsync((uri, ex) -> {
+                try (var http_client = HttpClient.newBuilder()
+                        .executor(ex)
+                        .build()) {
+                    
+                    var request = HttpRequest.newBuilder(uri)
+                            .build();
+                    
+                    return http_client.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray())
+                            .thenApply(HttpResponse::body);
+                }
+            });
 
-    private record Media(URL url, byte[] data) {}
+    private record Media(URI uri, byte[] data) {}
 
-    private static final Map<URL, Path> storage = new HashMap<>();
+    private static final Map<URI, Path> storage = new HashMap<>();
 
-    private static final Map<URL, byte[]> to_store = new HashMap<>();
+    private static final Map<URI, byte[]> to_store = new HashMap<>();
     
     public static void loadStorageCache(Path dir) {
         int i = 0;
@@ -32,7 +51,7 @@ public class MediaCache {
             var key = dir.resolve("k" + i);
             var value = dir.resolve("v" + i);
             try {
-                storage.put(new URI(Files.readString(key)).toURL(), value);
+                storage.put(new URI(Files.readString(key)), value);
             } catch (IOException | URISyntaxException e) {
                 System.err.print("Failed to load cache entry " + i + " from " + dir + ": ");
                 e.printStackTrace();
@@ -77,7 +96,7 @@ public class MediaCache {
             final int j = i; // for the lambda autocapture
             var future = CompletableFuture.runAsync(() -> {
                 try {
-                    Files.writeString(key, entry.getKey().toExternalForm());
+                    Files.writeString(key, entry.getKey().toString());
                     Files.write(value, entry.getValue());
                 } catch (IOException e) {
                     System.err.print("Failed to save cache entry " + j + " to " + dir + ": ");
@@ -94,7 +113,7 @@ public class MediaCache {
         System.out.println("Saved " + i + " cache entries to " + dir);
     }
 
-    private static final Map<String, Map<Object, Media>> cache = new HashMap<>();
+//    private static final Map<String, Map<Object, Media>> cache = new HashMap<>();
 
     public static synchronized <T> Image getImage(String scope, T key, Function<? super T, ? extends URL> url_provider) {
         try {
@@ -136,60 +155,18 @@ public class MediaCache {
     }
 
     public static synchronized <T> byte[] get(String scope, T key, Function<? super T, ? extends URL> url_provider) {
-        // System.out.println("Getting " + key + " from " + scope);
-        // System.out.println("Current Cache: " + toString(cache));
-        var map = cache.computeIfAbsent(scope, (e) -> new WeakHashMap<>());
         try {
-            var url = url_provider.apply(key);
-            synchronized (map) {
-                if (map.containsKey(key)) {
-                    if (map.get(key).url.equals(url)) {
-                        return map.get(key).data();
-                    } else {
-                        // the URL has changed, so we need to reload the image
-                        map.remove(key);
-                        return get(scope, key, url_provider);
-                    }
-                }
-            }
-
-            synchronized (storage) {
-                if (storage.containsKey(url)) {
-                    var path = storage.get(url);
-                    var data = Files.readAllBytes(path);
-                    synchronized (map) {
-                        map.put(key, new Media(url, data));
-                    }
-                    synchronized (to_store) {
-                        to_store.put(url, data);
-                    }
-                    return data;
-                }
-            }
-
-            var data = url.openStream().readAllBytes();
-
-            synchronized (map) {
-                map.put(key, new Media(url, data));
-            }
-            synchronized (to_store) {
-                to_store.put(url, data);
-            }
-            return data;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            return cache.get(url_provider.apply(key).toURI()).join();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 
     public static <T> boolean has(String scope, T key, Function<? super T, ? extends URL> url_provider) {
-        var map = cache.get(scope);
-        if (map == null) {
-            return false;
-        }
-        var url = url_provider.apply(key);
-        synchronized (map) {
-            return map.containsKey(key) && map.get(key).url.equals(url);
+        try {
+            return cache.getIfPresent(url_provider.apply(key).toURI()) != null;
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 }

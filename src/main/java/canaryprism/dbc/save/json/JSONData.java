@@ -1,15 +1,13 @@
 package canaryprism.dbc.save.json;
 
-import java.io.InputStream;
-import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.util.Optional;
-
-import org.apache.commons.io.input.ReaderInputStream;
+import canaryprism.dbc.save.Data;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import canaryprism.dbc.save.Data;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 public sealed interface JSONData<T> extends Data permits JSONObjectData, JSONArrayData {
 
@@ -28,7 +26,7 @@ public sealed interface JSONData<T> extends Data permits JSONObjectData, JSONArr
 
     @Override
     default InputStream streamData() {
-        return new ReaderInputStream(new StringReader(this.get().toString()), Charset.defaultCharset());
+        return new ByteArrayInputStream(this.get().toString().getBytes(StandardCharsets.UTF_8));
     }
     
 }

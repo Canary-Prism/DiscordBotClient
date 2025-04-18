@@ -1,11 +1,11 @@
 package canaryprism.dbc.markdown;
 
-import java.util.ArrayList;
-import java.util.regex.Pattern;
-
+import canaryprism.dbc.Main;
+import canaryprism.dbc.markdown.text.Text;
 import org.apache.commons.text.StringEscapeUtils;
 
-import canaryprism.dbc.Main;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class DiscordMarkdown {
     public static final Pattern bold_italic = Pattern.compile("(?<!\\\\)\\*(?<!\\\\)\\*(?<!\\\\)\\*([^`]+?)(?<!\\\\)\\*(?<!\\\\)\\*(?<!\\\\)\\*");
@@ -88,6 +88,10 @@ public class DiscordMarkdown {
             this.line_dominating = line_dominating;
             this.mimicks_newline = mimicks_newline;
         }
+    }
+    
+    public static Text parse(String str) {
+    
     }
 
     public static String toXHTML(String str) {
