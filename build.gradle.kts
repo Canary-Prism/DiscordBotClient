@@ -28,7 +28,8 @@ dependencies {
     implementation(libs.commons.text)
     implementation(libs.json)
     implementation(libs.directories)
-    implementation(libs.javacord)
+//    implementation(libs.javacord)
+    implementation(libs.jda)
     implementation(libs.imageio.webp)
     implementation(libs.caffeine)
 
