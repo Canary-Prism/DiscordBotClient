@@ -2,19 +2,21 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-com-formdev-flatlaf = "3.3"
-com-twelvemonkeys-imageio-imageio-webp = "3.10.1"
-dev-dirs-directories = "26"
-org-apache-commons-commons-text = "1.12.0"
-org-javacord-javacord = "3.8.0"
-org-json-json = "20240303"
-org-junit-jupiter-junit-jupiter-api = "5.11.0"
+flatlaf = "3.3"
+imageio-webp = "3.10.1"
+directories = "26"
+commons-text = "1.12.0"
+javacord = "3.8.0"
+json = "20240303"
+jupiter = "5.11.0"
+caffeine = "3.2.0"
 
 [libraries]
-com-formdev-flatlaf = { module = "com.formdev:flatlaf", version.ref = "com-formdev-flatlaf" }
-com-twelvemonkeys-imageio-imageio-webp = { module = "com.twelvemonkeys.imageio:imageio-webp", version.ref = "com-twelvemonkeys-imageio-imageio-webp" }
-dev-dirs-directories = { module = "dev.dirs:directories", version.ref = "dev-dirs-directories" }
-org-apache-commons-commons-text = { module = "org.apache.commons:commons-text", version.ref = "org-apache-commons-commons-text" }
-org-javacord-javacord = { module = "org.javacord:javacord", version.ref = "org-javacord-javacord" }
-org-json-json = { module = "org.json:json", version.ref = "org-json-json" }
-org-junit-jupiter-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "org-junit-jupiter-junit-jupiter-api" }
+flatlaf = { module = "com.formdev:flatlaf", version.ref = "flatlaf" }
+imageio-webp = { module = "com.twelvemonkeys.imageio:imageio-webp", version.ref = "imageio-webp" }
+directories = { module = "dev.dirs:directories", version.ref = "directories" }
+commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }
+javacord = { module = "org.javacord:javacord", version.ref = "javacord" }
+json = { module = "org.json:json", version.ref = "json" }
+jupiter = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }

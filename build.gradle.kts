@@ -24,14 +24,14 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation(libs.com.formdev.flatlaf)
-    implementation(libs.org.apache.commons.commons.text)
-    implementation(libs.org.json.json)
-    implementation(libs.dev.dirs.directories)
-    implementation(libs.org.javacord.javacord)
-    implementation(libs.com.twelvemonkeys.imageio.imageio.webp)
+    implementation(libs.flatlaf)
+    implementation(libs.commons.text)
+    implementation(libs.json)
+    implementation(libs.directories)
+    implementation(libs.javacord)
+    implementation(libs.imageio.webp)
 
-    testImplementation(libs.org.junit.jupiter.junit.jupiter.api)
+    testImplementation(libs.jupiter)
 }
 
 tasks.withType<JavaCompile> {
