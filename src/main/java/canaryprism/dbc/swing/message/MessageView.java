@@ -6,8 +6,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
+import net.dv8tion.jda.api.entities.Message;
 import org.apache.commons.text.StringEscapeUtils;
-import org.javacord.api.entity.message.Message;
 
 import canaryprism.dbc.Main;
 import canaryprism.dbc.MediaCache;
@@ -26,6 +26,10 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -73,18 +77,18 @@ public class MessageView extends JComponent {
 
         this.message = Objects.requireNonNull(message);
 
-        this.edited = message.getLastEditTimestamp().isPresent();
+        this.edited = message.getTimeEdited() != null;
 
-        this.is_reply = message.getReferencedMessage().isPresent();
+        this.is_reply = message.getReferencedMessage() != null;
         if (is_reply) {
-            reply_view = new ReferenceMessageView(message.getReferencedMessage().get());
+            reply_view = new ReferenceMessageView(message.getReferencedMessage());
             reply_view.setLocation(pfp + 10 + 5, 5);
             this.add(reply_view);
         }
         
         // text_label.setVerticalAlignment(SwingConstants.TOP);
 
-        this.creation = ZonedDateTime.ofInstant(message.getCreationTimestamp(), ZoneId.systemDefault());
+        this.creation = ZonedDateTime.ofInstant(message.getTimeCreated().toInstant(), ZoneId.systemDefault());
 
         creation_label.setVerticalAlignment(JLabel.TOP);
 
@@ -94,17 +98,9 @@ public class MessageView extends JComponent {
         if (!is_reply) {
             if (previous != null) {
                 if (message.getAuthor().equals(previous.getAuthor())
-                    && previous.getCreationTimestamp().plus(author_collapse_timeout).isAfter(message.getCreationTimestamp())) {
+                    && previous.getTimeCreated().plus(author_collapse_timeout).isAfter(message.getTimeCreated())) {
                     this.collapse();
                 }
-            } else {
-                message.getChannel().getMessagesBefore(1, message).thenAccept((e) -> {
-                    var older = e.getLast();
-                    if (message.getAuthor().equals(older.getAuthor())
-                        && older.getCreationTimestamp().plus(author_collapse_timeout).isAfter(message.getCreationTimestamp()))
-                        this.collapse();
-        
-                });
             }
         }
 
@@ -114,23 +110,12 @@ public class MessageView extends JComponent {
 
         Thread.ofVirtual().start(() -> {
             // image = Main.getImage(message.getUserAuthor().get());
-            image = MediaCache.getImage("author_pfp", message.getAuthor(), (e) -> e.getAvatar(64).getUrl());
-            repaint();
-        });
-
-        message.getAuthor().asUser().ifPresent((user) -> {
-            user.addUserChangeAvatarListener((e) -> Thread.ofVirtual().start(() -> {
-                image = MediaCache.getImage("author_pfp", message.getAuthor(), (g) -> g.getAvatar(64).getUrl());
+            try {
+                image = MediaCache.getImage(new URI(message.getAuthor().getEffectiveAvatarUrl()));
                 repaint();
-            }));
-
-            user.addUserChangeNameListener((e) -> {
-                repaint();
-            });
-
-            user.addUserChangeNicknameListener((e) -> {
-                repaint();
-            });
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         message.addMessageEditListener((e) -> {

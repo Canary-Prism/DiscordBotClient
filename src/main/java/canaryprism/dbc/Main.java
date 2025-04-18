@@ -18,8 +18,15 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
-import org.javacord.api.DiscordApi;
-import org.javacord.api.DiscordApiBuilder;
+import canaryprism.dbc.save.json.JSONData;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.events.session.SessionDisconnectEvent;
+import net.dv8tion.jda.api.events.session.SessionRecreateEvent;
+import net.dv8tion.jda.api.events.session.SessionResumeEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
@@ -177,53 +184,58 @@ public class Main {
         // SwingUtilities.invokeLater(() -> {
             frame.setVisible(true);
         // });
-
-        api.addLostConnectionListener((e) -> {
-            SwingUtilities.invokeLater(() -> {
-                // frame_size = frame.getSize();
-                frame.setContentPane(lost_connection_panel);
-
-                frame.revalidate();
-                frame.repaint();
-            });
-        });
-
-        api.addResumeListener((e) -> {
-            SwingUtilities.invokeLater(() -> {
-                frame.setContentPane(main_panel);
-
-                frame.revalidate();
-                frame.repaint();
-            });
-        });
-
-        api.addReconnectListener((e) -> {
-            SwingUtilities.invokeLater(() -> {
-                var new_view = new DiscordView(api);
-                try {
-                    var old_view = (DiscordView) main_panel.getComponent(0);
-
-                    var selected_server = old_view.getSelectedServer();
-                    var selected_channel = old_view.getSelectedServerView().getSelectedChannel();
-
-                    new_view.showServer(selected_server);
-                    new_view.getSelectedServerView().showChannel(selected_channel);
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
-
-                main_panel.removeAll();
-                
-                
-                main_panel.add(new_view, BorderLayout.CENTER);
-
-
-
-                frame.setContentPane(main_panel);
-
-                frame.revalidate();
-                frame.repaint();
-            });
+        
+        api.addEventListener(new ListenerAdapter() {
+            @Override
+            public void onSessionDisconnect(@NotNull SessionDisconnectEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    // frame_size = frame.getSize();
+                    frame.setContentPane(lost_connection_panel);
+                    
+                    frame.revalidate();
+                    frame.repaint();
+                });
+            }
+            
+            @Override
+            public void onSessionResume(@NotNull SessionResumeEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    frame.setContentPane(main_panel);
+                    
+                    frame.revalidate();
+                    frame.repaint();
+                });
+            }
+            
+            @Override
+            public void onSessionRecreate(SessionRecreateEvent event) {
+                SwingUtilities.invokeLater(() -> {
+                    var new_view = new DiscordView(api);
+                    try {
+                        var old_view = (DiscordView) main_panel.getComponent(0);
+                        
+                        var selected_server = old_view.getSelectedServer();
+                        var selected_channel = old_view.getSelectedServerView().getSelectedChannel();
+                        
+                        new_view.showServer(selected_server);
+                        new_view.getSelectedServerView().showChannel(selected_channel);
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                    
+                    main_panel.removeAll();
+                    
+                    
+                    main_panel.add(new_view, BorderLayout.CENTER);
+                    
+                    
+                    
+                    frame.setContentPane(main_panel);
+                    
+                    frame.revalidate();
+                    frame.repaint();
+                });
+            }
         });
 
         System.out.println("done");
@@ -231,7 +243,7 @@ public class Main {
     
     private static Dimension frame_size;
 
-    private static DiscordApi login(Path path) {
+    private static JDA login(Path path) {
         String token = "";
         try {
             var json = new JSONObject(Files.readString(path));
@@ -240,7 +252,8 @@ public class Main {
 
         while (true) {
             try {
-                var api = new DiscordApiBuilder().setToken(token).setAllIntents().login().join();
+                
+                var api = JDABuilder.create(token, GatewayIntent.getIntents(GatewayIntent.ALL_INTENTS)).build().awaitReady();
 
                 try {
                     var json = new JSONObject();

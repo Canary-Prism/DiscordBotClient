@@ -7,6 +7,7 @@ imageio-webp = "3.10.1"
 directories = "26"
 commons-text = "1.12.0"
 javacord = "3.8.0"
+jda = "5.3.2"
 json = "20250107"
 jupiter = "5.11.0"
 caffeine = "3.2.0"
@@ -17,6 +18,7 @@ imageio-webp = { module = "com.twelvemonkeys.imageio:imageio-webp", version.ref 
 directories = { module = "dev.dirs:directories", version.ref = "directories" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }
 javacord = { module = "org.javacord:javacord", version.ref = "javacord" }
+jda = { module = "net.dv8tion:JDA", version.ref = "jda" }
 json = { module = "org.json:json", version.ref = "json" }
 jupiter = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
